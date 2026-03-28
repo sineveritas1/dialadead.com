@@ -1133,8 +1133,15 @@ audio.addEventListener('timeupdate',()=>{
   window.addEventListener('touchend',e=>{if(seeking) commit(e.changedTouches[0].clientX);});
 })()
 function formatTime(s){
+  if(!s) return '—';
+  // Handle "m:ss" or "h:mm:ss" string format from some archive.org recordings
+  if(typeof s==='string'&&s.includes(':')){
+    const p=s.split(':').map(Number);
+    s=p.length===3?p[0]*3600+p[1]*60+p[2]:p[0]*60+p[1];
+  }
+  s=Math.floor(parseFloat(s));
   if(!s||isNaN(s)) return '—';
-  s=Math.floor(s);return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+  return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 }
 
 // ── Random ────────────────────────────────────────────────────────────────────

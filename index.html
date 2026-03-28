@@ -815,34 +815,37 @@ audio.addEventListener('ended', () => {
     document.getElementById('play-pause-btn').textContent = '▶';
   }
 });
+let seeking=false;
 audio.addEventListener('timeupdate',()=>{
-  if(!audio.duration) return;
+  if(!audio.duration||seeking) return;
   const pct=(audio.currentTime/audio.duration*100)+'%';
   document.getElementById('progress-fill').style.width=pct;
   document.getElementById('progress-thumb').style.left=pct;
   document.getElementById('time-display').textContent=`${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
 });
-function seekTo(e){
-  const w=document.getElementById('progress-wrap');
-  const pct=Math.min(1,Math.max(0,(e.clientX-w.getBoundingClientRect().left)/w.offsetWidth));
-  if(audio.duration) audio.currentTime=pct*audio.duration;
-}
 (function(){
   const wrap=document.getElementById('progress-wrap');
-  let dragging=false;
-  function applySeek(clientX){
-    const pct=Math.min(1,Math.max(0,(clientX-wrap.getBoundingClientRect().left)/wrap.offsetWidth));
+  function getPct(clientX){
+    return Math.min(1,Math.max(0,(clientX-wrap.getBoundingClientRect().left)/wrap.offsetWidth));
+  }
+  function updateVisual(pct){
     const p=(pct*100)+'%';
     document.getElementById('progress-fill').style.width=p;
     document.getElementById('progress-thumb').style.left=p;
+    if(audio.duration) document.getElementById('time-display').textContent=`${formatTime(pct*audio.duration)} / ${formatTime(audio.duration)}`;
+  }
+  function commit(clientX){
+    seeking=false;
+    const pct=getPct(clientX);
+    updateVisual(pct);
     if(audio.duration) audio.currentTime=pct*audio.duration;
   }
-  wrap.addEventListener('mousedown',e=>{dragging=true;applySeek(e.clientX);});
-  window.addEventListener('mousemove',e=>{if(dragging) applySeek(e.clientX);});
-  window.addEventListener('mouseup',()=>{dragging=false;});
-  wrap.addEventListener('touchstart',e=>{dragging=true;applySeek(e.touches[0].clientX);},{passive:true});
-  window.addEventListener('touchmove',e=>{if(dragging) applySeek(e.touches[0].clientX);},{passive:true});
-  window.addEventListener('touchend',()=>{dragging=false;});
+  wrap.addEventListener('mousedown',e=>{seeking=true;updateVisual(getPct(e.clientX));e.preventDefault();});
+  window.addEventListener('mousemove',e=>{if(seeking) updateVisual(getPct(e.clientX));});
+  window.addEventListener('mouseup',e=>{if(seeking) commit(e.clientX);});
+  wrap.addEventListener('touchstart',e=>{seeking=true;updateVisual(getPct(e.touches[0].clientX));},{passive:true});
+  window.addEventListener('touchmove',e=>{if(seeking) updateVisual(getPct(e.touches[0].clientX));},{passive:true});
+  window.addEventListener('touchend',e=>{if(seeking) commit(e.changedTouches[0].clientX);});
 })()
 function formatTime(s){
   if(!s||isNaN(s)) return '—';

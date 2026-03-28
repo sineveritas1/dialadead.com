@@ -1006,22 +1006,31 @@ async function loadShow(identifier,m,d,y,venue,city,type){
 function cleanName(raw){
   if(!raw) return '—';
   let s=raw;
-  // Strip extension
+  // Strip audio extension
   s=s.replace(/\.(mp3|flac|shn|ogg|wav)$/i,'');
-  // Strip bitrate/quality suffixes e.g. .64kb .128kb _vbr
+  // Strip bitrate suffixes
   s=s.replace(/[._](64|128|192|256|320)k?b?$/i,'').replace(/_vbr$/i,'');
-  // Strip full GD date+disc+track prefix: gd1977-05-08d1t01 / gd77-05-08s1t01
-  s=s.replace(/^gd\d{2,4}[-.]?\d{2}[-.]?\d{2}[-._]?(d\d+)?(s\d+)?t\d+[-._]*/i,'');
-  // Strip remaining disc/set/track prefix: d1t02, s2t03, t04
-  s=s.replace(/^(d\d+)?(s\d+)?t\d+[-._\s]*/i,'');
+  // Strip trailing dot-chained encoding tags e.g. .sbeok.shnf.shntool.md5
+  s=s.replace(/(\.(sbeok|shnf|shntool|shn|flac\d*|md5|st5|sbd|aud|matrix|vbr))+$/gi,'');
+  // Strip full GD prefix including arbitrary mid-path tokens
+  // handles: gd82-08-08d1t01, gd1982-08-08.sbd.miller.31175.sbeok.d1t01, etc.
+  s=s.replace(/^gd\d{2,4}[.\-]\d{2}[.\-]\d{2}(\.[a-z0-9]+)*[.\-_]?(d\d+)?(s\d+)?t\d+[._\-\s]*/i,'');
+  // Strip remaining disc/set/track prefix: .d1t02, s2t03, t04
+  s=s.replace(/^\.?(d\d+)?(s\d+)?t\d+[._\-\s]*/i,'');
   // Strip standalone leading track numbers: "01 " or "01-" or "01."
-  s=s.replace(/^\d{1,3}[-._\s]+/,'');
-  // Strip encoding/source tags embedded in name
-  s=s.replace(/\b(sbeok|shnf|shn|flac\d*|sbd|aud|matrix|remaster(ed)?|stereo|mono|set\d*|disc\d*|d\d+)\b/gi,'');
-  // Strip numeric noise tokens (archive IDs like .23661.)
-  s=s.replace(/\.\d{4,}\./g,' ');
-  // Normalize separators
-  s=s.replace(/[_\-]+/g,' ').replace(/\s+/g,' ').trim();
+  s=s.replace(/^\d{1,3}[._\-\s]+/,'');
+  // Strip inline technical/encoding tags
+  s=s.replace(/\b(sbeok|shnf|shntool|shn|flac\d*|sbd|aud|matrix|remaster(ed)?|stereo|mono|set\d+|disc\d+|d\d+)\b/gi,'');
+  // Strip large standalone numeric IDs (archive record numbers like 31175)
+  s=s.replace(/\b\d{4,}\b/g,' ');
+  // Normalize transition arrows
+  s=s.replace(/\s*->\s*/g,' > ');
+  // Convert dots, underscores, hyphens to spaces
+  s=s.replace(/[._\-]+/g,' ');
+  // Clean whitespace
+  s=s.replace(/\s+/g,' ').trim();
+  // Strip leading/trailing stray punctuation (orphaned > . - etc)
+  s=s.replace(/^[^a-zA-Z0-9(]+|[^a-zA-Z0-9'")]+$/g,'').trim();
   // Title-case if all lowercase
   if(s&&s===s.toLowerCase()) s=s.replace(/\b\w/g,c=>c.toUpperCase());
   return s||'—';

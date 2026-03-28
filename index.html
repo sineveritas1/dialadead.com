@@ -23,6 +23,7 @@ body{
 
 /* ── MACHINE ── */
 .machine{
+  position:relative;
   width:100%;
   max-width:480px;
   background:#090909;
@@ -514,7 +515,7 @@ input { color-scheme: dark; }
 
 /* ── PURIST BUTTON ── */
 .purist-btn{
-  position:fixed;top:12px;right:14px;z-index:200;
+  position:absolute;top:12px;right:14px;z-index:200;
   background:transparent;
   border:1px solid #39FF1455;
   color:#39FF14;
@@ -657,8 +658,8 @@ html.purist .setup-box p{color:#555555;}
 </style>
 </head>
 <body>
-<button class="purist-btn" id="purist-btn" onclick="togglePurist()">PURIST</button>
 <div class="machine">
+<button class="purist-btn" id="purist-btn" onclick="togglePurist()">PURIST</button>
 
   <div class="leds">
     <div class="led p"></div><div class="led g"></div><div class="led b"></div>

@@ -1014,7 +1014,7 @@ function cleanName(raw){
   s=s.replace(/(\.(sbeok|shnf|shntool|shn|flac\d*|md5|st5|sbd|aud|matrix|vbr))+$/gi,'');
   // Strip full GD prefix including arbitrary mid-path tokens
   // handles: gd82-08-08d1t01, gd1982-08-08.sbd.miller.31175.sbeok.d1t01, etc.
-  s=s.replace(/^gd\d{2,4}[.\-]\d{2}[.\-]\d{2}(\.[a-z0-9]+)*[.\-_]?(d\d+)?(s\d+)?t\d+[._\-\s]*/i,'');
+  s=s.replace(/^gd\d{2,4}[.\-]\d{2}[.\-]\d{2}(\.[a-z0-9]+)*[\s._\-]*(d\d+)?(s\d+)?t\d+[._\-\s]*/i,'');
   // Strip remaining disc/set/track prefix: .d1t02, s2t03, t04
   s=s.replace(/^\.?(d\d+)?(s\d+)?t\d+[._\-\s]*/i,'');
   // Strip standalone leading track numbers: "01 " or "01-" or "01."

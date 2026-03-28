@@ -70,11 +70,12 @@ body{
   font-size:clamp(26px,8vw,38px);
   font-weight:900;
   letter-spacing:clamp(3px,1.8vw,7px);
-
   color:#39FF14;
   text-shadow:0 0 14px #39FF14, 0 0 30px #39FF1466;
   white-space:nowrap;
 }
+/* Extra spacing around the narrow I to optically balance DIAL vs DEAD */
+.title-i{letter-spacing:clamp(6px,3vw,14px);}
 .subtitle{
   font-size:10px;
   color:#FF1493;
@@ -718,7 +719,7 @@ html.purist .setup-box p{color:#555555;}
     <img class="logo"
       src="https://res.cloudinary.com/dmbeoutyi/image/upload/v1774666557/Untitled_design_16_v575qu.png"
       alt="Logo" onerror="this.style.display='none'">
-    <div class="title">DIAL·A·DEA<span style="letter-spacing:0">D</span></div>
+    <div class="title">D<span class="title-i">I</span>AL·A·DEA<span style="letter-spacing:0">D</span></div>
     <div class="subtitle">GRATEFUL DEAD TIME MACHINE · 1965–1995</div>
   </div>
 

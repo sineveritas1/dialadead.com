@@ -248,7 +248,7 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
 
 /* Show info */
 .show-date-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-.show-nav-arrows{display:flex;gap:2px;flex-shrink:0;}
+.show-nav-arrows{display:flex;gap:2px;flex-shrink:0;transform:translateY(-4px);}
 .show-nav-btn{
   background:transparent;border:none;outline:none;
   color:#FF149388;font-size:clamp(22px,7vw,28px);font-weight:900;
@@ -773,8 +773,8 @@ html.purist .setup-box p{color:#555555;}
     <div class="show-date-row">
       <div class="show-date-big" id="show-date-big"></div>
       <div class="show-nav-arrows">
-        <button class="show-nav-btn" onclick="prevShow()">←<span class="nav-label">PREV</span></button>
-        <button class="show-nav-btn" onclick="nextShow()">→<span class="nav-label">NEXT</span></button>
+        <button class="show-nav-btn" onclick="prevShow();this.blur()">←<span class="nav-label">PREV</span></button>
+        <button class="show-nav-btn" onclick="nextShow();this.blur()">→<span class="nav-label">NEXT</span></button>
       </div>
     </div>
     <div class="show-venue-big" id="show-venue-big"></div>

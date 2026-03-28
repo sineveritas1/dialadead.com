@@ -394,6 +394,13 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
 .track-item.active .track-name{color:#FF1493;text-shadow:0 0 6px #FF149344;}
 .track-dur{font-size:10px;color:#666;flex-shrink:0;}
 .track-item.active .track-dur{color:#FF149388;}
+.track-dl{font-size:11px;color:#444;flex-shrink:0;background:none;border:none;cursor:pointer;padding:0 2px;line-height:1;transition:color .12s;}
+.track-item:hover .track-dl{color:#888;}
+.track-item.active .track-dl{color:#FF149366;}
+.track-dl.loading{opacity:.4;cursor:wait;}
+html.purist .track-dl{color:#ccc;}
+html.purist .track-item:hover .track-dl{color:#888;}
+html.purist .track-item.active .track-dl{color:#CC000066;}
 
 /* ── ARCHIVE ── */
 .archive-toggle{
@@ -1065,7 +1072,22 @@ function buildTracklist(){
       <div class="track-icon">${i===currentTrack?'▶':''}</div>
       <div class="track-name">${t.name}</div>
       <div class="track-dur">${formatTime(t.duration)}</div>
+      <button class="track-dl" title="Download" onclick="event.stopPropagation();dlTrack(${i},this)">⬇</button>
     </div>`).join('');
+}
+async function dlTrack(i,btn){
+  const t=tracks[i];
+  btn.classList.add('loading');
+  try{
+    const r=await fetch(t.url);
+    const blob=await r.blob();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=(t.name||`track-${i+1}`).replace(/[^\w\s-]/g,'').trim()+'.mp3';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }catch(e){alert('Download failed. Try right-clicking the track and saving directly from archive.org.');}
+  finally{btn.classList.remove('loading');}
 }
 function updateActive(){
   document.querySelectorAll('.track-item').forEach((el,i)=>{

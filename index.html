@@ -970,9 +970,15 @@ async function loadShow(identifier,m,d,y,venue,city,type){
     const hiQ=allMp3s.filter(f=>!/[._](64|128)kb?\.mp3$/i.test(f.name)&&!/_vbr\.mp3$/i.test(f.name));
     const pool=(hiQ.length?hiQ:allMp3s).sort((a,b)=>a.name.localeCompare(b.name));
     // Deduplicate by track number extracted from filename
-    function trackNum(name){const m=name.match(/t(\d{1,3})\.(mp3)$/i)||name.match(/[-_](\d{2,3})\.mp3$/i);return m?parseInt(m[1]):null;}
+    // Include disc/set in dedup key so d1t01 and d2t01 are not treated as the same track
+    function trackKey(name){
+      const disc=name.match(/[ds](\d+)t\d/i);
+      const track=name.match(/t(\d{1,3})\.mp3$/i)||name.match(/[-_](\d{2,3})\.mp3$/i);
+      if(!track) return null;
+      return (disc?disc[1]+'_':'')+track[1];
+    }
     const seen=new Set();
-    const mp3s=pool.filter(f=>{const n=trackNum(f.name);if(n===null)return true;if(seen.has(n))return false;seen.add(n);return true;});
+    const mp3s=pool.filter(f=>{const n=trackKey(f.name);if(n===null)return true;if(seen.has(n))return false;seen.add(n);return true;});
     if(!mp3s.length){setStatus('err','☠ NO AUDIO AVAILABLE');return;}
     const v=venue||meta.metadata?.venue||'';
     const c=city||meta.metadata?.coverage||'';

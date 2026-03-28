@@ -737,9 +737,9 @@ html.purist .setup-box p{color:#555555;}
 
     <div class="transport">
       <div class="transport-controls">
-        <button class="t-btn" onclick="prevTrack()">⏮</button>
-        <button class="t-btn play-pause" id="play-pause-btn" onclick="togglePlay()">⏸</button>
-        <button class="t-btn" onclick="nextTrack()">⏭</button>
+        <button class="t-btn" onclick="prevTrack()">⏮&#xFE0E;</button>
+        <button class="t-btn play-pause" id="play-pause-btn" onclick="togglePlay()">⏸&#xFE0E;</button>
+        <button class="t-btn" onclick="nextTrack()">⏭&#xFE0E;</button>
       </div>
       <div class="progress-row">
         <div class="progress-wrap" id="progress-wrap">
@@ -1010,12 +1010,12 @@ function playTrack(i){
   audio.src=tracks[i].url;
   audio.load();
   audio.play().catch(()=>{});
-  document.getElementById('play-pause-btn').textContent='⏸';
+  document.getElementById('play-pause-btn').textContent='\u23F8\uFE0E';
   updateActive();
 }
 function togglePlay(){
-  if(audio.paused){audio.play();document.getElementById('play-pause-btn').textContent='⏸';}
-  else{audio.pause();document.getElementById('play-pause-btn').textContent='▶';}
+  if(audio.paused){audio.play();document.getElementById('play-pause-btn').textContent='\u23F8\uFE0E';}
+  else{audio.pause();document.getElementById('play-pause-btn').textContent='\u25B6\uFE0E';}
 }
 function prevTrack(){audio.currentTime>3?audio.currentTime=0:playTrack(Math.max(0,currentTrack-1));}
 function nextTrack(){playTrack(Math.min(tracks.length-1,currentTrack+1));}

@@ -70,6 +70,7 @@ body{
   font-size:clamp(26px,8vw,38px);
   font-weight:900;
   letter-spacing:clamp(3px,1.8vw,7px);
+  padding-left:clamp(3px,1.8vw,7px);
   color:#39FF14;
   text-shadow:0 0 14px #39FF14, 0 0 30px #39FF1466;
   white-space:nowrap;
@@ -256,8 +257,17 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
   cursor:pointer;padding:0 4px;border-radius:4px;
   transition:color .15s,-webkit-text-stroke .15s;
   -webkit-appearance:none;appearance:none;
+  display:flex;flex-direction:column;align-items:center;gap:1px;
 }
 .show-nav-btn:hover{color:#FF1493;-webkit-text-stroke:1.5px #FF1493;}
+.show-nav-btn:hover .nav-label{color:#FF1493;}
+.nav-label{
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px;letter-spacing:2px;
+  color:#FF149366;
+  -webkit-text-stroke:0;
+  line-height:1;transition:color .15s;
+}
 .show-nav-btn:hover{color:#FF1493;}
 .show-date-big{
   font-family:'Orbitron',monospace;
@@ -601,6 +611,8 @@ html.purist .player-panel{background:#f7f7f7;border-color:#cccccc;box-shadow:non
 html.purist .show-date-big{color:#CC0000 !important;text-shadow:none !important;}
 html.purist .show-nav-btn{color:#CC000055;-webkit-text-stroke:1.5px #CC000055;}
 html.purist .show-nav-btn:hover{color:#CC0000;-webkit-text-stroke:1.5px #CC0000;}
+html.purist .nav-label{color:#CC000055;}
+html.purist .show-nav-btn:hover .nav-label{color:#CC0000;}
 html.purist .show-venue-big{color:#003087 !important;text-shadow:none !important;}
 html.purist .show-meta{color:#555555;}
 
@@ -761,8 +773,8 @@ html.purist .setup-box p{color:#555555;}
     <div class="show-date-row">
       <div class="show-date-big" id="show-date-big"></div>
       <div class="show-nav-arrows">
-        <button class="show-nav-btn" onclick="prevShow()" title="Previous show">←</button>
-        <button class="show-nav-btn" onclick="nextShow()" title="Next show">→</button>
+        <button class="show-nav-btn" onclick="prevShow()">←<span class="nav-label">PREV</span></button>
+        <button class="show-nav-btn" onclick="nextShow()">→<span class="nav-label">NEXT</span></button>
       </div>
     </div>
     <div class="show-venue-big" id="show-venue-big"></div>

@@ -481,6 +481,18 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
   z-index:999;white-space:nowrap;
 }
 .share-toast.show{opacity:1;}
+.fave-toast{
+  position:fixed;bottom:64px;left:50%;transform:translateX(-50%);
+  background:#FF1493;color:#000;
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;letter-spacing:2px;
+  padding:10px 20px;border-radius:8px;
+  box-shadow:0 0 20px #FF149388;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s;
+  z-index:999;white-space:nowrap;
+}
+.fave-toast.visible{opacity:1;}
 
 /* Force colors - override dark mode browser defaults */
 * { -webkit-tap-highlight-color: transparent; }
@@ -623,6 +635,7 @@ input { color-scheme: dark; }
   </div>
 
   <div class="share-toast" id="share-toast">LINK COPIED!</div>
+  <div class="fave-toast" id="fave-toast"></div>
 <div class="footer">
   <a href="https://archive.org/details/GratefulDead" style="color:#888;text-decoration:none;">☆ GRATEFUL DEAD ARCHIVE.ORG ☆</a><br>
   <a href="https://neondeadhead.com" style="color:#39FF14;text-decoration:none;text-shadow:0 0 8px #39FF1466;">NEONDEADHEAD.COM</a><br>
@@ -925,12 +938,18 @@ function checkUrlDate(){
 // ── Favorites ─────────────────────────────────────────────────────────────────
 function getFaves(){return JSON.parse(localStorage.getItem('deadFaves')||'[]');}
 function saveFaves(arr){localStorage.setItem('deadFaves',JSON.stringify(arr));}
+function showFaveError(msg){
+  const t=document.getElementById('fave-toast');
+  t.textContent=msg;t.classList.add('visible');
+  setTimeout(()=>t.classList.remove('visible'),3000);
+}
 function toggleFave(){
   if(!currentShow) return;
   const faves=getFaves();
   const idx=faves.findIndex(f=>f.date===currentShow.date);
   if(idx>=0){faves.splice(idx,1);}
-  else{if(faves.length>=3) faves.shift();faves.push(currentShow);}
+  else if(faves.length>=5){showFaveError('MAX 5 FAVES — REMOVE ONE FIRST');return;}
+  else{faves.push(currentShow);}
   saveFaves(faves);
   updateHeartBtn();
   renderFaves();

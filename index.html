@@ -246,11 +246,21 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
 }
 
 /* Show info */
+.show-date-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.show-nav-arrows{display:flex;gap:2px;flex-shrink:0;}
+.show-nav-btn{
+  background:transparent;border:none;outline:none;
+  color:#FF149388;font-size:16px;line-height:1;
+  cursor:pointer;padding:2px 5px;border-radius:4px;
+  transition:color .15s;
+  -webkit-appearance:none;appearance:none;
+}
+.show-nav-btn:hover{color:#FF1493;}
 .show-date-big{
   font-family:'Orbitron',monospace;
   font-size:clamp(14px,4.5vw,17px);font-weight:900;
   color:#FF1493;text-shadow:0 0 10px #FF1493;
-  letter-spacing:2px;margin-bottom:4px;
+  letter-spacing:2px;
 }
 .show-venue-big{
   font-size:12px;color:#00BFFF;
@@ -586,6 +596,8 @@ html.purist .cursor{color:#003087;}
 /* Player */
 html.purist .player-panel{background:#f7f7f7;border-color:#cccccc;box-shadow:none;}
 html.purist .show-date-big{color:#CC0000 !important;text-shadow:none !important;}
+html.purist .show-nav-btn{color:#CC000055;}
+html.purist .show-nav-btn:hover{color:#CC0000;}
 html.purist .show-venue-big{color:#003087 !important;text-shadow:none !important;}
 html.purist .show-meta{color:#555555;}
 
@@ -743,7 +755,13 @@ html.purist .setup-box p{color:#555555;}
 
   <!-- PLAYER -->
   <div class="player-panel" id="player-panel">
-    <div class="show-date-big" id="show-date-big"></div>
+    <div class="show-date-row">
+      <div class="show-date-big" id="show-date-big"></div>
+      <div class="show-nav-arrows">
+        <button class="show-nav-btn" onclick="prevShow()" title="Previous show">←</button>
+        <button class="show-nav-btn" onclick="nextShow()" title="Next show">→</button>
+      </div>
+    </div>
     <div class="show-venue-big" id="show-venue-big"></div>
     <div class="show-meta" id="show-meta"></div>
     <div class="share-row" style="justify-content:space-between;">
@@ -1171,6 +1189,18 @@ function renderFaves(){
       <div class="show-src ${f.type||'aud'}">${(f.type||'aud')==='sbd'?'▸ SBD':'▸ AUD'}</div>
     </div>`;
   }).join('');
+}
+
+// ── Show navigation ──────────────────────────────────────────────────────────
+function prevShow(){
+  if(!currentShow||!ALL_SHOWS.length) return;
+  const idx=ALL_SHOWS.findIndex(s=>s.date===currentShow.date);
+  if(idx>0) dialShow(ALL_SHOWS[idx-1].date);
+}
+function nextShow(){
+  if(!currentShow||!ALL_SHOWS.length) return;
+  const idx=ALL_SHOWS.findIndex(s=>s.date===currentShow.date);
+  if(idx<ALL_SHOWS.length-1) dialShow(ALL_SHOWS[idx+1].date);
 }
 
 // ── Purist mode ───────────────────────────────────────────────────────────────

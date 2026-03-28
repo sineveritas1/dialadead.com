@@ -1115,7 +1115,7 @@ async function dlTrack(i,btn){
 }
 function dlShow(btn){
   if(!currentShow?.identifier) return;
-  window.open(`https://archive.org/compress/${currentShow.identifier}/formats=MP3`,'_blank');
+  window.open(`https://archive.org/compress/${currentShow.identifier}`,'_blank');
 }
 function updateActive(){
   document.querySelectorAll('.track-item').forEach((el,i)=>{

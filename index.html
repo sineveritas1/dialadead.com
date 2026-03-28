@@ -511,9 +511,153 @@ input { color-scheme: dark; }
 .archive-badge { color: #39FF14 !important; }
 .show-venue { color: #aaa !important; }
 .show-city { color: #39FF14 !important; }
+
+/* ── PURIST BUTTON ── */
+.purist-btn{
+  position:fixed;top:12px;right:14px;z-index:200;
+  background:transparent;
+  border:1px solid #39FF1455;
+  color:#39FF14;
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;letter-spacing:2px;
+  padding:5px 11px;border-radius:5px;
+  cursor:pointer;transition:all .15s;
+}
+.purist-btn:hover{background:#39FF1415;}
+html.purist .purist-btn{border-color:#00308799;color:#003087;background:transparent;}
+html.purist .purist-btn:hover{background:#e8eeff;}
+
+/* ── PURIST MODE ── */
+html.purist,html.purist body{background:#ffffff;}
+html.purist .machine{background:#ffffff;border-color:#cccccc;box-shadow:0 2px 16px rgba(0,0,0,0.08);}
+
+/* LEDs — no glow */
+html.purist .led.p{background:#CC0000;box-shadow:none;animation:none;}
+html.purist .led.g{background:#003087;box-shadow:none;animation:none;}
+html.purist .led.b{background:#CC0000;box-shadow:none;animation:none;}
+
+/* Header */
+html.purist .title{color:#CC0000;text-shadow:none;}
+html.purist .subtitle{color:#003087;text-shadow:none;}
+html.purist .logo{filter:none;}
+
+/* Date panel */
+html.purist .dest-panel{background:#f7f7f7;border-color:#cccccc;box-shadow:none;}
+html.purist .dest-lbl{color:#003087 !important;text-shadow:none !important;}
+html.purist .digit-wrap{background:#ffffff;border-color:#cccccc;box-shadow:none;}
+html.purist .digit-wrap:focus-within{border-color:#CC0000;box-shadow:none;}
+html.purist input.digit{color:#CC0000 !important;text-shadow:none;caret-color:#CC0000;}
+html.purist input.digit::placeholder{color:#CC000033;}
+html.purist .sep{color:#CC000055;}
+html.purist .dest-hint{color:#003087;}
+html.purist input{color-scheme:light;}
+
+/* Buttons */
+html.purist .btn-rnd{color:#003087;border-color:#00308877;box-shadow:none;}
+html.purist .btn-rnd:hover{background:#e8eeff;box-shadow:none;}
+html.purist .btn-engage{background:#CC0000;box-shadow:none;text-shadow:none;}
+html.purist .btn-engage:hover{background:#aa0000;}
+
+/* Status */
+html.purist .status{color:#003087 !important;text-shadow:none !important;}
+html.purist .status.err{color:#CC0000 !important;text-shadow:none !important;}
+html.purist .status.ok{color:#003087 !important;text-shadow:none !important;}
+html.purist .cursor{color:#003087;}
+
+/* Player */
+html.purist .player-panel{background:#f7f7f7;border-color:#cccccc;box-shadow:none;}
+html.purist .show-date-big{color:#CC0000 !important;text-shadow:none !important;}
+html.purist .show-venue-big{color:#003087 !important;text-shadow:none !important;}
+html.purist .show-meta{color:#555555;}
+
+/* Transport */
+html.purist .t-btn{background:#f0f0f0;border-color:#cccccc;color:#000000;}
+html.purist .t-btn:hover{background:#e0e0e0;border-color:#999999;}
+html.purist .t-btn.play-pause{background:#CC0000;border-color:#CC0000;box-shadow:none;}
+html.purist .t-btn.play-pause:hover{background:#aa0000;}
+html.purist .progress-wrap{background:#dddddd;}
+html.purist .progress-fill{background:#CC0000;box-shadow:none;}
+html.purist .progress-thumb{background:#333333;box-shadow:none;}
+html.purist .time-display{color:#003087 !important;}
+
+/* Tracklist */
+html.purist .tracklist-label{color:#003087 !important;text-shadow:none !important;}
+html.purist .track-count{color:#003087 !important;}
+html.purist .tracklist{scrollbar-color:#CC000033 #eeeeee;}
+html.purist .tracklist::-webkit-scrollbar-track{background:#eeeeee;}
+html.purist .tracklist::-webkit-scrollbar-thumb{background:#CC000055;border-radius:2px;}
+html.purist .track-item:hover{background:#CC000010;border-color:#CC000033;}
+html.purist .track-item.active{background:#CC000018;border-color:#CC000055;}
+html.purist .track-num{color:#888888 !important;}
+html.purist .track-item.active .track-num{color:#CC0000 !important;}
+html.purist .track-icon{color:#003087;text-shadow:none;}
+html.purist .track-name{color:#111111 !important;}
+html.purist .track-item.active .track-name{color:#CC0000 !important;text-shadow:none !important;}
+html.purist .track-dur{color:#888888 !important;}
+html.purist .track-item.active .track-dur{color:#CC000088 !important;}
+
+/* Archive */
+html.purist .archive-toggle{background:#f7f7f7;border-color:#cccccc;}
+html.purist .archive-toggle:hover{border-color:#003087;}
+html.purist .archive-toggle-label{color:#003087;text-shadow:none;}
+html.purist .archive-badge{color:#003087 !important;}
+html.purist .toggle-arrow{color:#003087;}
+html.purist .archive-body{background:#f7f7f7;border-color:#cccccc;}
+html.purist .ytab{color:#555555;border-color:#cccccc;background:transparent;}
+html.purist .ytab:hover{border-color:#CC000055;color:#CC0000;}
+html.purist .ytab.active{background:#CC000015;border-color:#CC000088;color:#CC0000;}
+html.purist .ytab.all.active{background:#00308715;border-color:#00308788;color:#003087;}
+html.purist .show-search{background:#ffffff;border-color:#cccccc;color:#000000;caret-color:#CC0000;}
+html.purist .show-search::placeholder{color:#00308755;}
+html.purist .show-search:focus{border-color:#003087;}
+html.purist .show-grid{scrollbar-color:#CC000033 #eeeeee;}
+html.purist .show-grid::-webkit-scrollbar-track{background:#eeeeee;}
+html.purist .show-grid::-webkit-scrollbar-thumb{background:#CC000044;border-radius:2px;}
+html.purist .show-item{background:#ffffff;border-color:#dddddd;}
+html.purist .show-item:hover{border-color:#CC000055;background:#CC000008;}
+html.purist .show-item:active{background:#CC000015;}
+html.purist .show-date{color:#CC0000;}
+html.purist .show-venue{color:#555555 !important;}
+html.purist .show-city{color:#003087 !important;}
+html.purist .show-src.sbd{color:#003087;}
+html.purist .show-src.aud{color:#00308788;}
+
+/* Faves */
+html.purist .faves-header{color:#CC0000;text-shadow:none;}
+html.purist .fave-card{background:#ffffff;border-color:#CC000033;}
+html.purist .fave-card:hover{border-color:#CC0000;background:#CC000008;}
+html.purist .fave-date{color:#CC0000;}
+html.purist .fave-venue{color:#555555;}
+html.purist .fave-city{color:#003087;}
+html.purist .fave-remove:hover{color:#CC0000;}
+html.purist .faves-empty{color:#aaaaaa;}
+html.purist .btn-share{color:#003087;border-color:#00308766;box-shadow:none;}
+html.purist .btn-share:hover{background:#e8eeff;box-shadow:none;}
+html.purist .btn-fave{color:#CC0000;border-color:#CC000066;}
+html.purist .btn-fave:hover{background:#CC000015;border-color:#CC0000;}
+html.purist .btn-fave.saved{background:#CC000025;border-color:#CC0000;box-shadow:none;}
+
+/* Toasts */
+html.purist .share-toast{background:#003087;box-shadow:none;}
+html.purist .fave-toast{background:#CC0000;box-shadow:none;}
+
+/* Footer — override inline styles */
+html.purist .footer{color:#333333;}
+html.purist .footer a[href*="archive.org"]{color:#555555 !important;text-shadow:none !important;}
+html.purist .footer a[href*="neondeadhead"]{color:#003087 !important;text-shadow:none !important;}
+html.purist .footer a[href*="mailto"]{color:#003087 !important;text-shadow:none !important;}
+html.purist .footer a[href*="tel"]{color:#CC0000 !important;text-shadow:none !important;}
+
+/* Misc */
+html.purist .no-shows{color:#aaaaaa;}
+html.purist .setup-box{background:#fff8f8;border-color:#CC000033;}
+html.purist .setup-box h3{color:#CC0000;}
+html.purist .setup-box code{background:#f5f5f5;border-color:#dddddd;color:#003087;}
+html.purist .setup-box p{color:#555555;}
 </style>
 </head>
 <body>
+<button class="purist-btn" id="purist-btn" onclick="togglePurist()">PURIST</button>
 <div class="machine">
 
   <div class="leds">
@@ -1007,6 +1151,17 @@ function renderFaves(){
       <div class="show-src ${f.type||'aud'}">${(f.type||'aud')==='sbd'?'▸ SBD':'▸ AUD'}</div>
     </div>`;
   }).join('');
+}
+
+// ── Purist mode ───────────────────────────────────────────────────────────────
+function togglePurist(){
+  const on=document.documentElement.classList.toggle('purist');
+  localStorage.setItem('puristMode',on?'1':'');
+  document.getElementById('purist-btn').textContent=on?'NEON':'PURIST';
+}
+if(localStorage.getItem('puristMode')){
+  document.documentElement.classList.add('purist');
+  document.getElementById('purist-btn').textContent='NEON';
 }
 
 init();

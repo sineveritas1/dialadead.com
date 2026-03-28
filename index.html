@@ -446,6 +446,29 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
   box-shadow:0 0 6px #39FF1422;
 }
 .btn-share:hover{background:#39FF1415;box-shadow:0 0 12px #39FF14;}
+.btn-fave{
+  background:transparent;
+  border:1px solid #FF149366;
+  color:#FF1493;
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;letter-spacing:2px;
+  padding:5px 12px;border-radius:5px;
+  cursor:pointer;transition:all .15s;
+}
+.btn-fave:hover{background:#FF149318;border-color:#FF1493;}
+.btn-fave.saved{background:#FF149333;border-color:#FF1493;box-shadow:0 0 8px #FF149566;}
+
+/* ── Fave Shows ── */
+.faves-section{margin-bottom:12px;}
+.faves-header{font-family:'Orbitron',monospace;font-size:10px;color:#FF1493;letter-spacing:3px;margin-bottom:8px;text-align:center;text-shadow:0 0 8px #FF149555;}
+.faves-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.fave-card{position:relative;background:#000;border:1px solid #FF149333;border-radius:6px;padding:8px 8px 6px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:3px;}
+.fave-card:hover{border-color:#FF1493;background:#FF149308;}
+.fave-date{font-size:9px;color:#FF1493;letter-spacing:1px;font-weight:bold;padding-right:14px;}
+.fave-venue{font-size:8px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fave-city{font-size:8px;color:#39FF14aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fave-remove{position:absolute;top:3px;right:5px;background:none;border:none;color:#444;font-size:13px;cursor:pointer;padding:0;line-height:1;transition:color .12s;}
+.fave-remove:hover{color:#FF1493;}
 .share-toast{
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
   background:#39FF14;color:#000;
@@ -546,7 +569,10 @@ input { color-scheme: dark; }
     <div class="show-date-big" id="show-date-big"></div>
     <div class="show-venue-big" id="show-venue-big"></div>
     <div class="show-meta" id="show-meta"></div>
-    <div class="share-row"><button class="btn-share" onclick="shareShow()">⤴ SHARE THIS SHOW</button></div>
+    <div class="share-row" style="justify-content:space-between;">
+      <button class="btn-fave" id="btn-fave" onclick="toggleFave()">♡ SAVE SHOW</button>
+      <button class="btn-share" onclick="shareShow()">⤴ SHARE THIS SHOW</button>
+    </div>
 
     <div class="transport">
       <div class="transport-controls">
@@ -571,6 +597,12 @@ input { color-scheme: dark; }
   </div>
 
   <audio id="audio"></audio>
+
+  <!-- FAVE SHOWS -->
+  <div class="faves-section" id="faves-section" style="display:none">
+    <div class="faves-header">♥ FAVE SHOWS</div>
+    <div class="faves-grid" id="faves-grid"></div>
+  </div>
 
   <!-- ARCHIVE (collapsed) -->
   <div class="archive-toggle" onclick="toggleArchive()">
@@ -604,7 +636,7 @@ input { color-scheme: dark; }
 <script>
 const MONTHS=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 let ALL_SHOWS=[], SHOW_MAP={}, activeYear='all';
-let tracks=[], currentTrack=0;
+let tracks=[], currentTrack=0, currentShow=null;
 const audio = document.getElementById('audio');
 
 // ── Archive toggle ────────────────────────────────────────────────────────────
@@ -743,6 +775,8 @@ async function loadShow(identifier,m,d,y,venue,city,type){
     const c=city||meta.metadata?.coverage||'';
     const isSbd=type==='sbd'||/sbd|soundboard|matrix/i.test(identifier);
     const ms=String(m).padStart(2,'0'),ds=String(d).padStart(2,'0');
+    currentShow={date:`${y}-${ms}-${ds}`,venue:v,city:c,type:isSbd?'sbd':'aud'};
+    updateHeartBtn();
     document.getElementById('show-date-big').textContent=`${MONTHS[m-1]} ${ds}, ${y}`;
     document.getElementById('show-venue-big').textContent=`${v}${c?' · '+c:''}`;
     document.getElementById('show-meta').textContent=`${mp3s.length} TRACKS · ${isSbd?'SOUNDBOARD':'AUDIENCE TAPE'}`;
@@ -888,7 +922,51 @@ function checkUrlDate(){
 }
 
 
+// ── Favorites ─────────────────────────────────────────────────────────────────
+function getFaves(){return JSON.parse(localStorage.getItem('deadFaves')||'[]');}
+function saveFaves(arr){localStorage.setItem('deadFaves',JSON.stringify(arr));}
+function toggleFave(){
+  if(!currentShow) return;
+  const faves=getFaves();
+  const idx=faves.findIndex(f=>f.date===currentShow.date);
+  if(idx>=0){faves.splice(idx,1);}
+  else{if(faves.length>=3) faves.shift();faves.push(currentShow);}
+  saveFaves(faves);
+  updateHeartBtn();
+  renderFaves();
+}
+function removeFave(date){
+  saveFaves(getFaves().filter(f=>f.date!==date));
+  updateHeartBtn();
+  renderFaves();
+}
+function updateHeartBtn(){
+  const btn=document.getElementById('btn-fave');
+  if(!btn||!currentShow) return;
+  const saved=getFaves().some(f=>f.date===currentShow.date);
+  btn.textContent=saved?'♥ SAVED':'♡ SAVE SHOW';
+  btn.classList.toggle('saved',saved);
+}
+function renderFaves(){
+  const faves=getFaves();
+  const section=document.getElementById('faves-section');
+  if(!faves.length){section.style.display='none';return;}
+  section.style.display='block';
+  document.getElementById('faves-grid').innerHTML=faves.map(f=>{
+    const[fy,fm,fd]=f.date.split('-').map(Number);
+    const label=`${MONTHS[fm-1]} ${String(fd).padStart(2,'0')} '${String(fy).slice(2)}`;
+    return `<div class="fave-card" onclick="dialShow('${f.date}')">
+      <button class="fave-remove" onclick="event.stopPropagation();removeFave('${f.date}')">×</button>
+      <div class="fave-date">${label}</div>
+      <div class="fave-venue">${f.venue||'—'}</div>
+      <div class="fave-city">${f.city||''}</div>
+      <div class="show-src ${f.type||'aud'}">${(f.type||'aud')==='sbd'?'▸ SBD':'▸ AUD'}</div>
+    </div>`;
+  }).join('');
+}
+
 init();
+renderFaves();
 checkUrlDate();
 </script>
 </body>

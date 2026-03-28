@@ -291,10 +291,9 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
 /* CSS-drawn pause bars (default/playing state) */
 .t-btn.play-pause::before{
   content:'';display:block;
-  width:3px;height:14px;
-  background:#fff;box-shadow:7px 0 0 #fff;
+  width:13px;height:14px;
+  background:linear-gradient(to right,#fff 3px,transparent 3px,transparent 10px,#fff 10px);
   border-radius:1px;
-  margin-left:-5px;
 }
 /* CSS-drawn play triangle (paused state) */
 .t-btn.play-pause.paused::before{

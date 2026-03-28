@@ -948,7 +948,7 @@ function toggleFave(){
   const faves=getFaves();
   const idx=faves.findIndex(f=>f.date===currentShow.date);
   if(idx>=0){faves.splice(idx,1);}
-  else if(faves.length>=5){showFaveError('MAX 5 FAVES — REMOVE ONE FIRST');return;}
+  else if(faves.length>=6){showFaveError('MAX 6 FAVES — REMOVE ONE FIRST');return;}
   else{faves.push(currentShow);}
   saveFaves(faves);
   updateHeartBtn();

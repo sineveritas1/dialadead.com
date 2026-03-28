@@ -283,11 +283,26 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
 .t-btn:active{transform:scale(0.95);}
 .t-btn.play-pause{
   background:#FF1493;border-color:#FF1493;
-  width:clamp(44px,12vw,52px);height:clamp(44px,12vw,52px);font-size:clamp(18px,5vw,22px);
+  width:clamp(44px,12vw,52px);height:clamp(44px,12vw,52px);font-size:0;
   box-shadow:0 0 12px #FF149566, inset 0 0 0 7px #39FF14;
 }
 .t-btn.play-pause:hover{background:#ff3aac;}
 .t-btn.play-pause:active,.t-btn.play-pause:focus{background:#FF1493;}
+/* CSS-drawn pause bars (default/playing state) */
+.t-btn.play-pause::before{
+  content:'';display:block;
+  width:3px;height:14px;
+  background:#fff;box-shadow:7px 0 0 #fff;
+  border-radius:1px;
+}
+/* CSS-drawn play triangle (paused state) */
+.t-btn.play-pause.paused::before{
+  width:0;height:0;
+  background:transparent;box-shadow:none;border-radius:0;
+  border-style:solid;border-width:7px 0 7px 13px;
+  border-color:transparent transparent transparent #fff;
+  margin-left:3px;
+}
 
 .progress-row{
   display:flex;align-items:center;gap:8px;
@@ -579,6 +594,8 @@ html.purist .t-btn{background:#f0f0f0;border-color:#cccccc;color:#000000;}
 html.purist .t-btn:hover{background:#e0e0e0;border-color:#999999;}
 html.purist .t-btn.play-pause{background:#CC0000;border-color:#CC0000;box-shadow:inset 0 0 0 7px #003087;}
 html.purist .t-btn.play-pause:hover{background:#aa0000;}
+html.purist .t-btn.play-pause::before{background:#fff;box-shadow:7px 0 0 #fff;}
+html.purist .t-btn.play-pause.paused::before{background:transparent;box-shadow:none;border-color:transparent transparent transparent #fff;}
 html.purist .progress-wrap{background:#dddddd;}
 html.purist .progress-fill{background:#CC0000;box-shadow:none;}
 html.purist .progress-thumb{background:#333333;box-shadow:none;}
@@ -738,7 +755,7 @@ html.purist .setup-box p{color:#555555;}
     <div class="transport">
       <div class="transport-controls">
         <button class="t-btn" onclick="prevTrack()">⏮&#xFE0E;</button>
-        <button class="t-btn play-pause" id="play-pause-btn" onclick="togglePlay()">⏸&#xFE0E;</button>
+        <button class="t-btn play-pause" id="play-pause-btn" onclick="togglePlay()"></button>
         <button class="t-btn" onclick="nextTrack()">⏭&#xFE0E;</button>
       </div>
       <div class="progress-row">
@@ -1010,12 +1027,12 @@ function playTrack(i){
   audio.src=tracks[i].url;
   audio.load();
   audio.play().catch(()=>{});
-  document.getElementById('play-pause-btn').textContent='\u23F8\uFE0E';
+  document.getElementById('play-pause-btn').classList.remove('paused');
   updateActive();
 }
 function togglePlay(){
-  if(audio.paused){audio.play();document.getElementById('play-pause-btn').textContent='\u23F8\uFE0E';}
-  else{audio.pause();document.getElementById('play-pause-btn').textContent='\u25B6\uFE0E';}
+  if(audio.paused){audio.play();document.getElementById('play-pause-btn').classList.remove('paused');}
+  else{audio.pause();document.getElementById('play-pause-btn').classList.add('paused');}
 }
 function prevTrack(){audio.currentTime>3?audio.currentTime=0:playTrack(Math.max(0,currentTrack-1));}
 function nextTrack(){playTrack(Math.min(tracks.length-1,currentTrack+1));}
@@ -1025,10 +1042,10 @@ audio.addEventListener('ended', () => {
     audio.src = tracks[currentTrack].url;
     audio.load();
     audio.play().catch(()=>{});
-    document.getElementById('play-pause-btn').textContent = '⏸';
+    document.getElementById('play-pause-btn').classList.remove('paused');
     updateActive();
   } else {
-    document.getElementById('play-pause-btn').textContent = '▶';
+    document.getElementById('play-pause-btn').classList.add('paused');
   }
 });
 let seeking=false;

@@ -263,8 +263,11 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
 
 /* Transport */
 .transport{
-  display:flex;align-items:center;gap:8px;
+  display:flex;flex-direction:column;gap:10px;
   margin-bottom:14px;
+}
+.transport-controls{
+  display:flex;align-items:center;justify-content:center;gap:8px;
 }
 .t-btn{
   background:#111;border:1px solid #2a2a2a;border-radius:6px;
@@ -282,17 +285,31 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
 }
 .t-btn.play-pause:hover{background:#ff3aac;}
 
+.progress-row{
+  display:flex;align-items:center;gap:8px;
+}
 .progress-wrap{
   flex:1;cursor:pointer;
-  height:8px;background:#1a1a1a;border-radius:4px;
-  position:relative;
+  height:10px;background:#1a1a1a;border-radius:5px;
+  position:relative;overflow:visible;
 }
 .progress-fill{
   height:100%;
   background:linear-gradient(90deg,#FF1493,#39FF14);
-  border-radius:4px;width:0%;
+  border-radius:5px;width:0%;
   transition:width .4s linear;
   box-shadow:0 0 6px #FF149555;
+}
+.progress-thumb{
+  position:absolute;
+  top:50%;left:0%;
+  transform:translate(-50%,-50%);
+  width:4px;height:20px;
+  background:#fff;
+  border-radius:2px;
+  box-shadow:0 0 8px #ffffff99;
+  transition:left .4s linear;
+  pointer-events:none;
 }
 .time-display{
   font-size:10px;color:#00BFFFcc;
@@ -532,13 +549,18 @@ input { color-scheme: dark; }
     <div class="share-row"><button class="btn-share" onclick="shareShow()">⤴ SHARE THIS SHOW</button></div>
 
     <div class="transport">
-      <button class="t-btn" onclick="prevTrack()">⏮</button>
-      <button class="t-btn play-pause" id="play-pause-btn" onclick="togglePlay()">⏸</button>
-      <button class="t-btn" onclick="nextTrack()">⏭</button>
-      <div class="progress-wrap" onclick="seekTo(event)">
-        <div class="progress-fill" id="progress-fill"></div>
+      <div class="transport-controls">
+        <button class="t-btn" onclick="prevTrack()">⏮</button>
+        <button class="t-btn play-pause" id="play-pause-btn" onclick="togglePlay()">⏸</button>
+        <button class="t-btn" onclick="nextTrack()">⏭</button>
       </div>
-      <div class="time-display" id="time-display">0:00 / 0:00</div>
+      <div class="progress-row">
+        <div class="progress-wrap" onclick="seekTo(event)">
+          <div class="progress-fill" id="progress-fill"></div>
+          <div class="progress-thumb" id="progress-thumb"></div>
+        </div>
+        <div class="time-display" id="time-display">0:00 / 0:00</div>
+      </div>
     </div>
 
     <div class="tracklist-header">
@@ -795,7 +817,9 @@ audio.addEventListener('ended', () => {
 });
 audio.addEventListener('timeupdate',()=>{
   if(!audio.duration) return;
-  document.getElementById('progress-fill').style.width=(audio.currentTime/audio.duration*100)+'%';
+  const pct=(audio.currentTime/audio.duration*100)+'%';
+  document.getElementById('progress-fill').style.width=pct;
+  document.getElementById('progress-thumb').style.left=pct;
   document.getElementById('time-display').textContent=`${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
 });
 function seekTo(e){

@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>DIAL-A-DEAD</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 :root{--pink:#FF1493;--green:#39FF14;--blue:#00BFFF;}
@@ -1024,7 +1023,7 @@ async function loadShow(identifier,m,d,y,venue,city,type){
     const c=city||meta.metadata?.coverage||'';
     const isSbd=type==='sbd'||/sbd|soundboard|matrix/i.test(identifier);
     const ms=String(m).padStart(2,'0'),ds=String(d).padStart(2,'0');
-    currentShow={date:`${y}-${ms}-${ds}`,venue:v,city:c,type:isSbd?'sbd':'aud'};
+    currentShow={date:`${y}-${ms}-${ds}`,venue:v,city:c,type:isSbd?'sbd':'aud',identifier};
     updateHeartBtn();
     document.getElementById('show-date-big').textContent=`${MONTHS[m-1]} ${ds}, ${y}`;
     document.getElementById('show-venue-big').textContent=`${v}${c?' · '+c:''}`;
@@ -1089,51 +1088,34 @@ function buildTracklist(){
       <button class="track-dl" title="Download" onclick="event.stopPropagation();dlTrack(${i},this)">DL</button>
     </div>`).join('');
 }
-async function fetchWithRetry(url,tries=3){
-  for(let i=0;i<tries;i++){
-    try{const r=await fetch(url);if(r.ok)return r;}catch(e){if(i===tries-1)throw e;}
-    await new Promise(res=>setTimeout(res,800*(i+1)));
-  }
-}
-function triggerBlobDownload(blob,filename){
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=filename;
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),10000);
+async function fetchWithTimeout(url,ms=25000){
+  const ctrl=new AbortController();
+  const tid=setTimeout(()=>ctrl.abort(),ms);
+  try{
+    const r=await fetch(url,{signal:ctrl.signal});
+    if(!r.ok) throw new Error(r.status);
+    return r;
+  }finally{clearTimeout(tid);}
 }
 async function dlTrack(i,btn){
   const t=tracks[i];
   const orig=btn.textContent;
   btn.classList.add('loading');btn.textContent='...';
   try{
-    const r=await fetchWithRetry(t.url);
+    const r=await fetchWithTimeout(t.url);
     const blob=await r.blob();
-    triggerBlobDownload(blob,(t.name||`track-${i+1}`).replace(/[^\w\s-]/g,'').trim()+'.mp3');
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=(t.name||`track-${i+1}`).replace(/[^\w\s-]/g,'').trim()+'.mp3';
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),15000);
     btn.textContent='✓';setTimeout(()=>{btn.textContent=orig;},2000);
   }catch(e){btn.textContent='ERR';setTimeout(()=>{btn.textContent=orig;},2000);}
   finally{btn.classList.remove('loading');}
 }
-async function dlShow(btn){
-  if(!tracks.length)return;
-  const orig=btn.textContent;
-  btn.classList.add('loading');btn.textContent='ZIPPING...';
-  try{
-    const zip=new JSZip();
-    for(let i=0;i<tracks.length;i++){
-      btn.textContent=`${i+1}/${tracks.length}`;
-      const t=tracks[i];
-      const r=await fetchWithRetry(t.url);
-      const buf=await r.arrayBuffer();
-      const fname=`${String(i+1).padStart(2,'0')} ${(t.name||`track-${i+1}`).replace(/[^\w\s-]/g,'').trim()}.mp3`;
-      zip.file(fname,buf);
-    }
-    const blob=await zip.generateAsync({type:'blob',compression:'STORE'});
-    const showLabel=(currentShow?.date||'show').replace(/\//g,'-');
-    triggerBlobDownload(blob,`GD-${showLabel}.zip`);
-    btn.textContent='✓ DONE';setTimeout(()=>{btn.textContent=orig;},3000);
-  }catch(e){btn.textContent='ERR';setTimeout(()=>{btn.textContent=orig;},2500);}
-  finally{btn.classList.remove('loading');}
+function dlShow(btn){
+  if(!currentShow?.identifier) return;
+  window.open(`https://archive.org/compress/${currentShow.identifier}/formats=MP3`,'_blank');
 }
 function updateActive(){
   document.querySelectorAll('.track-item').forEach((el,i)=>{

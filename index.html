@@ -1155,14 +1155,19 @@ function renderFaves(){
 }
 
 // ── Purist mode ───────────────────────────────────────────────────────────────
+const LOGO_NEON='https://res.cloudinary.com/dmbeoutyi/image/upload/v1774666557/Untitled_design_16_v575qu.png';
+const LOGO_PURIST='https://res.cloudinary.com/dmbeoutyi/image/upload/v1774725492/Untitled_design_21_aakkji.png';
+function setLogo(purist){document.querySelector('.logo').src=purist?LOGO_PURIST:LOGO_NEON;}
 function togglePurist(){
   const on=document.documentElement.classList.toggle('purist');
   localStorage.setItem('puristMode',on?'1':'');
   document.getElementById('purist-btn').textContent=on?'NEON':'PURIST';
+  setLogo(on);
 }
 if(localStorage.getItem('puristMode')){
   document.documentElement.classList.add('purist');
   document.getElementById('purist-btn').textContent='NEON';
+  setLogo(true);
 }
 
 init();

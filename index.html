@@ -1008,7 +1008,7 @@ async function loadShow(identifier,m,d,y,venue,city,type){
     document.getElementById('show-venue-big').textContent=`${v}${c?' · '+c:''}`;
     document.getElementById('show-meta').textContent=`${mp3s.length} TRACKS · ${isSbd?'SOUNDBOARD':'AUDIENCE TAPE'}`;
     document.getElementById('track-count').textContent=`${mp3s.length} TRACKS`;
-    tracks=mp3s.map(f=>({name:cleanName(f.title||f.name),url:`https://archive.org/download/${identifier}/${encodeURIComponent(f.name)}`,duration:f.length||0}));
+    tracks=mp3s.map((f,i)=>{const n=cleanName(f.title||f.name);return{name:n==='—'?`TRACK ${String(i+1).padStart(2,'0')}`:n,url:`https://archive.org/download/${identifier}/${encodeURIComponent(f.name)}`,duration:f.length||0};});
     currentTrack=0;
     buildTracklist();
     document.getElementById('player-panel').classList.add('visible');
@@ -1030,8 +1030,11 @@ function cleanName(raw){
   // Strip full GD prefix including arbitrary mid-path tokens
   // handles: gd82-08-08d1t01, gd1982-08-08.sbd.miller.31175.sbeok.d1t01, etc.
   s=s.replace(/^gd\d{2,4}[.\-]\d{2}[.\-]\d{2}(\.[a-z0-9]+)*[\s._\-]*(d\d+)?(s\d+)?t\d+[._\-\s]*/i,'');
-  // Strip GratefulDead full-name prefix: GratefulDead1994-06-18s1t01, GratefulDead_06_18_s1t01
-  s=s.replace(/^grateful[\s._-]*dead[\s\d._-]*?(s\d+)?(t\d+)?[._\-\s]*/i,'');
+  // Strip GratefulDead full-name prefix only when a song name (letter) follows the track code
+  // e.g. GratefulDead1994-06-18s1t01-DarkStarReprise → "DarkStarReprise"
+  s=s.replace(/^grateful[\s._-]*dead[\s\d._-]*(s\d+)?(t\d+)?[\s._-]*(?=[a-zA-Z])/i,'');
+  // Fallback: strip just GratefulDead+date when no song name follows (avoids eating everything)
+  s=s.replace(/^grateful[\s._-]*dead[\s\d._-]+/i,'');
   // Strip remaining disc/set/track prefix: .d1t02, s2t03, t04, s1t01
   s=s.replace(/^\.?(d\d+)?(s\d+)?t\d+[._\-\s]*/i,'');
   // Strip standalone leading track numbers: "01 " or "01-" or "01."

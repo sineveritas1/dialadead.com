@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>DIAL-A-DEAD</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 :root{--pink:#FF1493;--green:#39FF14;--blue:#00BFFF;}
@@ -273,6 +274,41 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
   line-height:1;transition:color .15s;
 }
 .show-nav-btn:hover{color:#FF1493;}
+.show-dl-btn{
+  background:transparent;border:1px solid #FF149344;border-radius:4px;
+  color:#FF149388;font-family:'Share Tech Mono',monospace;
+  font-size:9px;letter-spacing:2px;cursor:pointer;
+  padding:3px 6px;transition:color .15s,border-color .15s;white-space:nowrap;
+  -webkit-appearance:none;appearance:none;
+}
+.show-dl-btn:hover{color:#FF1493;border-color:#FF1493;}
+.show-dl-btn:active{opacity:.7;}
+.show-dl-btn.loading{color:#FF1493;border-color:#FF149366;}
+.dl-dot{display:inline-block;width:4px;height:4px;border-radius:50%;background:#39FF14;
+  box-shadow:0 0 4px #39FF14;margin-left:5px;vertical-align:middle;animation:blink .7s step-start infinite;}
+.show-dl-progress{display:none;height:3px;border-radius:2px;margin-top:4px;
+  background:#1a1a1a;overflow:hidden;width:100%;}
+.show-dl-progress.visible{display:block;}
+.show-dl-progress-fill{height:100%;width:0%;border-radius:2px;
+  background:#39FF14;box-shadow:0 0 6px #39FF1488;transition:width .3s ease;}
+.dl-warn-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;display:none;}
+.dl-warn-backdrop.visible{display:block;}
+.dl-warn{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:#111;border:1px solid #FF149366;border-radius:10px;
+  padding:18px 22px;z-index:1000;text-align:center;
+  box-shadow:0 0 30px #FF149344;display:none;min-width:220px;
+}
+.dl-warn.visible{display:block;}
+.dl-warn-msg{font-family:'Share Tech Mono',monospace;font-size:10px;
+  letter-spacing:2px;color:#FF1493;margin-bottom:14px;line-height:1.6;}
+.dl-warn-btns{display:flex;gap:8px;justify-content:center;}
+.dl-warn-btn{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;
+  padding:6px 12px;border-radius:4px;cursor:pointer;-webkit-appearance:none;appearance:none;}
+.dl-warn-btn.cancel{background:#FF149322;border:1px solid #FF1493;color:#FF1493;}
+.dl-warn-btn.keep{background:transparent;border:1px solid #444;color:#888;}
+.dl-warn-btn:hover.cancel{background:#FF149344;}
+.dl-warn-btn:hover.keep{border-color:#666;color:#aaa;}
 .show-date-big{
   font-family:'Orbitron',monospace;
   font-size:clamp(14px,4.5vw,17px);font-weight:900;
@@ -625,6 +661,16 @@ html.purist .show-nav-btn{color:#CC000055;-webkit-text-stroke:1.5px #CC000055;}
 html.purist .show-nav-btn:hover{color:#CC0000;-webkit-text-stroke:1.5px #CC0000;}
 html.purist .nav-label{color:#CC000055;}
 html.purist .show-nav-btn:hover .nav-label{color:#CC0000;}
+html.purist .show-dl-btn{color:#CC000055;border-color:#CC000033;}
+html.purist .show-dl-btn:hover{color:#CC0000;border-color:#CC0000;}
+html.purist .show-dl-btn.loading{color:#CC0000;border-color:#CC000066;}
+html.purist .dl-dot{background:#CC0000;box-shadow:none;}
+html.purist .show-dl-progress{background:#eeeeee;}
+html.purist .show-dl-progress-fill{background:#CC0000;box-shadow:none;}
+html.purist .dl-warn{background:#fff;border-color:#CC000066;box-shadow:0 2px 20px rgba(0,0,0,.15);}
+html.purist .dl-warn-msg{color:#CC0000;}
+html.purist .dl-warn-btn.cancel{background:#CC000015;border-color:#CC0000;color:#CC0000;}
+html.purist .dl-warn-backdrop{background:rgba(255,255,255,.7);}
 html.purist .show-venue-big{color:#003087 !important;text-shadow:none !important;}
 html.purist .show-meta{color:#555555;}
 
@@ -787,6 +833,10 @@ html.purist .setup-box p{color:#555555;}
       <div class="show-nav-arrows">
         <button class="show-nav-btn" onclick="prevShow();this.blur()">←<span class="nav-label">PREV</span></button>
         <button class="show-nav-btn" onclick="nextShow();this.blur()">→<span class="nav-label">NEXT</span></button>
+        <div style="display:flex;flex-direction:column;align-items:stretch;">
+          <button class="show-dl-btn" id="show-dl-btn" onclick="dlShow(this)">⬇ DL SHOW</button>
+          <div class="show-dl-progress" id="show-dl-progress"><div class="show-dl-progress-fill" id="show-dl-fill"></div></div>
+        </div>
       </div>
     </div>
     <div class="show-venue-big" id="show-venue-big"></div>
@@ -844,6 +894,14 @@ html.purist .setup-box p{color:#555555;}
     </div>
   </div>
 
+  <div class="dl-warn-backdrop" id="dl-warn-backdrop" onclick="keepDlShow()"></div>
+  <div class="dl-warn" id="dl-warn">
+    <div class="dl-warn-msg">⬇ DL IN PROGRESS<br>CANCEL TO CHANGE SHOW</div>
+    <div class="dl-warn-btns">
+      <button class="dl-warn-btn cancel" onclick="cancelDlShow()">✕ CANCEL DL</button>
+      <button class="dl-warn-btn keep" onclick="keepDlShow()">KEEP DL</button>
+    </div>
+  </div>
   <div class="share-toast" id="share-toast">LINK COPIED!</div>
   <div class="fave-toast" id="fave-toast"></div>
 <div class="footer">
@@ -938,6 +996,7 @@ function renderShows(list){
 }
 let dialTimer=null;
 function dialShow(dateStr){
+  if(guardShowChange(()=>dialShow(dateStr))) return;
   const[y,m,d]=dateStr.split('-').map(Number);
   document.getElementById('f-m').value=m;
   document.getElementById('f-d').value=d;
@@ -965,6 +1024,7 @@ function setStatus(cls,html){
 
 // ── Engage ────────────────────────────────────────────────────────────────────
 async function engage(){
+  if(guardShowChange(()=>engage())) return;
   const m=parseInt(document.getElementById('f-m').value)||0;
   const d=parseInt(document.getElementById('f-d').value)||0;
   const y=parseInt(document.getElementById('f-y').value)||0;
@@ -1090,14 +1150,90 @@ function buildTracklist(){
       <button class="track-dl" title="Download" onclick="event.stopPropagation();dlTrack(${i},this)">DL</button>
     </div>`).join('');
 }
-async function fetchWithTimeout(url,ms=25000,opts={}){
+async function fetchWithTimeout(url,ms=25000,opts={},extSignal=null){
   const ctrl=new AbortController();
   const tid=setTimeout(()=>ctrl.abort(),ms);
+  if(extSignal) extSignal.addEventListener('abort',()=>ctrl.abort(),{once:true});
   try{
-    const r=await fetch(url,{signal:ctrl.signal,...opts});
+    const r=await fetch(url,{...opts,signal:ctrl.signal});
     if(!r.ok) throw new Error(r.status);
     return r;
   }finally{clearTimeout(tid);}
+}
+// ── Show download ────────────────────────────────────────────────────────────
+let dlShowActive=false, dlShowAbort=null, pendingNav=null;
+function showDlWarn(){
+  document.getElementById('dl-warn').classList.add('visible');
+  document.getElementById('dl-warn-backdrop').classList.add('visible');
+}
+function hideDlWarn(){
+  document.getElementById('dl-warn').classList.remove('visible');
+  document.getElementById('dl-warn-backdrop').classList.remove('visible');
+}
+function guardShowChange(cb){
+  if(!dlShowActive) return false;
+  pendingNav=cb;
+  showDlWarn();
+  return true;
+}
+function cancelDlShow(){
+  if(dlShowAbort) dlShowAbort.abort();
+  dlShowActive=false;
+  hideDlWarn();
+  const btn=document.getElementById('show-dl-btn');
+  const bar=document.getElementById('show-dl-progress');
+  const fill=document.getElementById('show-dl-fill');
+  if(btn){btn.textContent='⬇ DL SHOW';btn.classList.remove('loading');}
+  if(bar) bar.classList.remove('visible');
+  if(fill) fill.style.width='0%';
+  if(pendingNav){const nav=pendingNav;pendingNav=null;nav();}
+}
+function keepDlShow(){
+  pendingNav=null;
+  hideDlWarn();
+}
+async function dlShow(btn){
+  if(dlShowActive) return;
+  if(!tracks.length) return;
+  dlShowAbort=new AbortController();
+  dlShowActive=true;
+  const orig=btn.innerHTML;
+  const bar=document.getElementById('show-dl-progress');
+  const fill=document.getElementById('show-dl-fill');
+  btn.classList.add('loading');
+  bar.classList.add('visible');
+  fill.style.width='0%';
+  try{
+    const zip=new JSZip();
+    for(let i=0;i<tracks.length;i++){
+      if(dlShowAbort.signal.aborted) throw new DOMException('cancelled','AbortError');
+      btn.innerHTML=`${i+1} / ${tracks.length}<span class="dl-dot"></span>`;
+      const t=tracks[i];
+      const r=await fetchWithTimeout(t.url,30000,{cache:'no-store'},dlShowAbort.signal);
+      zip.file(`${String(i+1).padStart(2,'0')} ${(t.name||`track-${i+1}`).replace(/[^\w\s-]/g,'').trim()}.mp3`,await r.arrayBuffer());
+      fill.style.width=`${Math.round((i+1)/tracks.length*100)}%`;
+    }
+    btn.innerHTML=`SAVING...<span class="dl-dot"></span>`;
+    const blob=await zip.generateAsync({type:'blob',compression:'STORE'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=`GD-${(currentShow?.date||'show').replace(/\//g,'-')}.zip`;
+    a.style.display='none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(a.href),15000);
+    btn.textContent='✓ DONE';
+    setTimeout(()=>{btn.innerHTML=orig;bar.classList.remove('visible');fill.style.width='0%';},3000);
+  }catch(e){
+    if(!dlShowAbort?.signal.aborted){
+      btn.textContent='ERR';
+      setTimeout(()=>{btn.innerHTML=orig;bar.classList.remove('visible');fill.style.width='0%';},2500);
+    }
+  }finally{
+    dlShowActive=false;dlShowAbort=null;
+    btn.classList.remove('loading');
+  }
 }
 async function dlTrack(i,btn){
   const t={...tracks[i]}; // snapshot at call time — immune to show change mid-download
@@ -1212,6 +1348,7 @@ function formatTime(s){
 // ── Random ────────────────────────────────────────────────────────────────────
 function randomShow(){
   if(!ALL_SHOWS.length) return;
+  if(guardShowChange(()=>randomShow())) return;
   dialShow(ALL_SHOWS[Math.floor(Math.random()*ALL_SHOWS.length)].date);
 }
 
@@ -1313,10 +1450,12 @@ function showNavIdx(){
   return idx;
 }
 function prevShow(){
+  if(guardShowChange(()=>prevShow())) return;
   const idx=showNavIdx();
   if(idx>0) dialShow(ALL_SHOWS[idx-1].date);
 }
 function nextShow(){
+  if(guardShowChange(()=>nextShow())) return;
   const idx=showNavIdx();
   if(idx!==-1&&idx<ALL_SHOWS.length-1) dialShow(ALL_SHOWS[idx+1].date);
 }

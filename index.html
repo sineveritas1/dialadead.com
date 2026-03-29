@@ -1209,7 +1209,7 @@ async function dlShow(btn){
       if(dlShowAbort.signal.aborted) throw new DOMException('cancelled','AbortError');
       btn.innerHTML=`${i+1} / ${tracks.length}<span class="dl-dot"></span>`;
       const t=tracks[i];
-      const r=await fetchWithTimeout(t.url,30000,{cache:'no-store'},dlShowAbort.signal);
+      const r=await fetchWithTimeout(t.url,45000,{cache:'no-store'},dlShowAbort.signal);
       zip.file(`${String(i+1).padStart(2,'0')} ${(t.name||`track-${i+1}`).replace(/[^\w\s-]/g,'').trim()}.mp3`,await r.arrayBuffer());
       fill.style.width=`${Math.round((i+1)/tracks.length*100)}%`;
     }

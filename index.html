@@ -282,7 +282,9 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
 }
 .show-dl-btn:hover{color:#FF1493;border-color:#FF1493;}
 .show-dl-btn:active{opacity:.7;}
-.show-dl-btn.loading{color:#FF1493;border-color:#FF149366;cursor:wait;}
+.show-dl-btn.loading{color:#FF1493;border-color:#FF149366;}
+.dl-dot{display:inline-block;width:4px;height:4px;border-radius:50%;background:#39FF14;box-shadow:0 0 4px #39FF14;margin-left:4px;vertical-align:middle;animation:blink .7s step-start infinite;}
+html.purist .dl-dot{background:#CC0000;box-shadow:none;}
 .show-dl-progress{
   display:none;height:3px;border-radius:2px;margin-top:4px;
   background:#1a1a1a;overflow:hidden;width:100%;
@@ -1141,13 +1143,13 @@ async function dlShow(btn){
   try{
     const zip=new JSZip();
     for(let i=0;i<tracks.length;i++){
-      btn.textContent=`${i+1} / ${tracks.length}`;
+      btn.innerHTML=`${i+1} / ${tracks.length}<span class="dl-dot"></span>`;
       const t=tracks[i];
       const r=await fetchWithTimeout(t.url,30000);
       zip.file(`${String(i+1).padStart(2,'0')} ${(t.name||`track-${i+1}`).replace(/[^\w\s-]/g,'').trim()}.mp3`, await r.arrayBuffer());
       fill.style.width=`${Math.round((i+1)/tracks.length*100)}%`;
     }
-    btn.textContent='SAVING...';
+    btn.innerHTML=`SAVING...<span class="dl-dot"></span>`;
     const blob=await zip.generateAsync({type:'blob',compression:'STORE'});
     const a=document.createElement('a');
     a.href=URL.createObjectURL(blob);
@@ -1155,10 +1157,10 @@ async function dlShow(btn){
     a.click();
     setTimeout(()=>URL.revokeObjectURL(a.href),15000);
     btn.textContent='✓ DONE';
-    setTimeout(()=>{btn.textContent=orig;bar.classList.remove('visible');fill.style.width='0%';},3000);
+    setTimeout(()=>{btn.innerHTML=orig;bar.classList.remove('visible');fill.style.width='0%';},3000);
   }catch(e){
     btn.textContent='ERR';
-    setTimeout(()=>{btn.textContent=orig;bar.classList.remove('visible');fill.style.width='0%';},2500);
+    setTimeout(()=>{btn.innerHTML=orig;bar.classList.remove('visible');fill.style.width='0%';},2500);
   }
   finally{btn.classList.remove('loading');}
 }

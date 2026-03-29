@@ -929,8 +929,8 @@ function renderShows(list){
     const label=`${MONTHS[m-1]} ${String(d).padStart(2,'0')} ${y}`;
     return `<div class="show-item" onclick="dialShow('${s.date}')">
       <div class="show-date">${label}</div>
-      <div class="show-venue">${s.venue||'—'}</div>
-      <div class="show-city">${s.city||''}</div>
+      <div class="show-venue">${escHtml(s.venue||'—')}</div>
+      <div class="show-city">${escHtml(s.city||'')}</div>
       <div class="show-src ${s.type||'aud'}">${(s.type||'aud')==='sbd'?'▸ SBD':'▸ AUD'}</div>
     </div>`;
   }).join('');
@@ -982,9 +982,10 @@ async function engage(){
   const tid=setTimeout(()=>ctrl.abort(),12000);
   try{
     const q=`collection:(GratefulDead) AND date:${key}`;
-    const r=await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}&fl[]=identifier&rows=10&output=json`,{signal:ctrl.signal});
+    const r=await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}&fl[]=identifier&rows=20&output=json`,{signal:ctrl.signal});
     clearTimeout(tid);
     if(gen!==loadGen) return;
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
     const data=await r.json();
     const docs=data.response?.docs||[];
     if(!docs.length){setStatus('err',`☠ NO SHOW: ${ms}/${ds}/${y}<br><span style="font-size:9px">THE DEAD DID NOT PLAY THIS NIGHT</span>`);return;}
@@ -1083,7 +1084,7 @@ function buildTracklist(){
     <div class="track-item${i===currentTrack?' active':''}" id="trk-${i}" onclick="playTrack(${i})">
       <div class="track-num">${String(i+1).padStart(2,'0')}</div>
       <div class="track-icon">${i===currentTrack?'▶':''}</div>
-      <div class="track-name">${t.name}</div>
+      <div class="track-name">${escHtml(t.name)}</div>
       <div class="track-dur">${formatTime(t.duration)}</div>
       <button class="track-dl" title="Download" onclick="event.stopPropagation();dlTrack(${i},this)">DL</button>
     </div>`).join('');
@@ -1098,7 +1099,7 @@ async function fetchWithTimeout(url,ms=25000,opts={}){
   }finally{clearTimeout(tid);}
 }
 async function dlTrack(i,btn){
-  const t=tracks[i];
+  const t={...tracks[i]}; // snapshot at call time — immune to show change mid-download
   const orig=btn.textContent;
   btn.classList.add('loading');btn.textContent='...';
   try{
@@ -1231,20 +1232,23 @@ function shareShow(){
 function checkUrlDate(){
   const params=new URLSearchParams(window.location.search);
   const date=params.get('date');
-  if(!date) return;
+  if(!date) return false;
   const parts=date.split('-');
-  if(parts.length!==3) return;
+  if(parts.length!==3) return false;
   const[y,m,d]=parts.map(Number);
-  if(!y||!m||!d) return;
+  if(!y||!m||!d) return false;
   document.getElementById('f-m').value=m;
   document.getElementById('f-d').value=d;
   document.getElementById('f-y').value=y;
-  // Date pre-filled — user taps ENGAGE to play
+  return true;
 }
 
 
+// ── Utilities ────────────────────────────────────────────────────────────────
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
 // ── Favorites ─────────────────────────────────────────────────────────────────
-function getFaves(){return JSON.parse(localStorage.getItem('deadFaves')||'[]');}
+function getFaves(){try{return JSON.parse(localStorage.getItem('deadFaves')||'[]');}catch(e){return [];}}
 function saveFaves(arr){localStorage.setItem('deadFaves',JSON.stringify(arr));}
 function showFaveError(msg){
   const t=document.getElementById('fave-toast');
@@ -1289,8 +1293,8 @@ function renderFaves(){
     return `<div class="fave-card" onclick="dialShow('${f.date}')">
       <button class="fave-remove" onclick="event.stopPropagation();removeFave('${f.date}')">×</button>
       <div class="fave-date">${label}</div>
-      <div class="fave-venue">${f.venue||'—'}</div>
-      <div class="fave-city">${f.city||''}</div>
+      <div class="fave-venue">${escHtml(f.venue||'—')}</div>
+      <div class="fave-city">${escHtml(f.city||'')}</div>
       <div class="show-src ${f.type||'aud'}">${(f.type||'aud')==='sbd'?'▸ SBD':'▸ AUD'}</div>
     </div>`;
   }).join('');
@@ -1332,9 +1336,8 @@ if(localStorage.getItem('puristMode')){
   setLogo(true);
 }
 
-init();
 renderFaves();
-checkUrlDate();
+init().then(()=>{ if(checkUrlDate()) engage(); });
 </script>
 </body>
 </html>

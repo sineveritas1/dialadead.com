@@ -1120,11 +1120,11 @@ function buildTracklist(){
       <button class="track-dl" title="Download" onclick="event.stopPropagation();dlTrack(${i},this)">DL</button>
     </div>`).join('');
 }
-async function fetchWithTimeout(url,ms=25000){
+async function fetchWithTimeout(url,ms=25000,opts={}){
   const ctrl=new AbortController();
   const tid=setTimeout(()=>ctrl.abort(),ms);
   try{
-    const r=await fetch(url,{signal:ctrl.signal});
+    const r=await fetch(url,{signal:ctrl.signal,...opts});
     if(!r.ok) throw new Error(r.status);
     return r;
   }finally{clearTimeout(tid);}
@@ -1134,7 +1134,7 @@ async function dlTrack(i,btn){
   const orig=btn.textContent;
   btn.classList.add('loading');btn.textContent='...';
   try{
-    const r=await fetchWithTimeout(t.url);
+    const r=await fetchWithTimeout(t.url,25000,{cache:'no-store'});
     const blob=await r.blob();
     const a=document.createElement('a');
     a.href=URL.createObjectURL(blob);
@@ -1158,7 +1158,7 @@ async function dlShow(btn){
     for(let i=0;i<tracks.length;i++){
       btn.innerHTML=`${i+1} / ${tracks.length}<span class="dl-dot"></span>`;
       const t=tracks[i];
-      const r=await fetchWithTimeout(t.url,30000);
+      const r=await fetchWithTimeout(t.url,30000,{cache:'no-store'});
       zip.file(`${String(i+1).padStart(2,'0')} ${(t.name||`track-${i+1}`).replace(/[^\w\s-]/g,'').trim()}.mp3`, await r.arrayBuffer());
       fill.style.width=`${Math.round((i+1)/tracks.length*100)}%`;
     }
@@ -1190,6 +1190,8 @@ function updateActive(){
 function playTrack(i){
   if(!tracks.length||i<0||i>=tracks.length) return;
   currentTrack=i;
+  audio.pause();
+  audio.src='';
   audio.src=tracks[i].url;
   audio.play().catch(()=>{});
   document.getElementById('play-pause-btn').classList.remove('paused');
@@ -1206,7 +1208,10 @@ audio.addEventListener('ended',()=>{
   if(currentTrack<tracks.length-1) playTrack(currentTrack+1);
   else document.getElementById('play-pause-btn').classList.add('paused');
 });
+let lastErrTrack=-1;
 audio.addEventListener('error',()=>{
+  if(currentTrack===lastErrTrack) return;
+  lastErrTrack=currentTrack;
   if(tracks.length&&currentTrack<tracks.length-1) setTimeout(()=>playTrack(currentTrack+1),800);
   else document.getElementById('play-pause-btn').classList.add('paused');
 });

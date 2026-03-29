@@ -890,7 +890,7 @@ html.purist .setup-box p{color:#555555;}
 <script>
 const MONTHS=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 let ALL_SHOWS=[], SHOW_MAP={}, activeYear='all';
-let tracks=[], currentTrack=0, currentShow=null;
+let tracks=[], currentTrack=0, currentShow=null, loadGen=0;
 const audio = document.getElementById('audio');
 
 // ── Archive toggle ────────────────────────────────────────────────────────────
@@ -967,6 +967,7 @@ function renderShows(list){
     </div>`;
   }).join('');
 }
+let dialTimer=null;
 function dialShow(dateStr){
   const[y,m,d]=dateStr.split('-').map(Number);
   document.getElementById('f-m').value=m;
@@ -975,7 +976,8 @@ function dialShow(dateStr){
   document.getElementById('archive-body').classList.remove('open');
   document.getElementById('toggle-arrow').classList.remove('open');
   window.scrollTo({top:0,behavior:'smooth'});
-  setTimeout(()=>engage(),300);
+  clearTimeout(dialTimer);
+  dialTimer=setTimeout(()=>engage(),300);
 }
 
 // ── Auto-tab inputs ───────────────────────────────────────────────────────────
@@ -1002,27 +1004,38 @@ async function engage(){
   if(d<1||d>31){setStatus('err','☠ INVALID DAY · 1–31');return;}
   if(y<1965||y>1995){setStatus('err','☠ YEAR OUT OF RANGE · 1965–1995');return;}
   const ms=String(m).padStart(2,'0'),ds=String(d).padStart(2,'0'),key=`${y}-${ms}-${ds}`;
+  const gen=++loadGen;
   document.getElementById('ebtn').style.animation='eflash .4s ease';
   setTimeout(()=>document.getElementById('ebtn').style.animation='',450);
   document.getElementById('player-panel').classList.remove('visible');
   setStatus('',`<span class="loading">⟳</span> SCANNING FOR ${ms}/${ds}/${y}...`);
-  if(SHOW_MAP[key]){const s=SHOW_MAP[key];await loadShow(s.id,m,d,y,s.venue,s.city,s.type);return;}
+  if(SHOW_MAP[key]){const s=SHOW_MAP[key];await loadShow(s.id,m,d,y,s.venue,s.city,s.type,gen);return;}
+  const ctrl=new AbortController();
+  const tid=setTimeout(()=>ctrl.abort(),12000);
   try{
     const q=`collection:(GratefulDead) AND date:${key}`;
-    const r=await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}&fl[]=identifier&rows=10&output=json`);
+    const r=await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}&fl[]=identifier&rows=10&output=json`,{signal:ctrl.signal});
+    clearTimeout(tid);
+    if(gen!==loadGen) return;
     const data=await r.json();
     const docs=data.response?.docs||[];
     if(!docs.length){setStatus('err',`☠ NO SHOW: ${ms}/${ds}/${y}<br><span style="font-size:9px">THE DEAD DID NOT PLAY THIS NIGHT</span>`);return;}
     const best=docs.sort((a,b)=>(/sbd|matrix/i.test(b.identifier)?1:0)-(/sbd|matrix/i.test(a.identifier)?1:0))[0];
-    await loadShow(best.identifier,m,d,y,'','',/sbd|matrix/i.test(best.identifier)?'sbd':'aud');
-  }catch(e){setStatus('err',`☠ ARCHIVE OFFLINE`);}
+    await loadShow(best.identifier,m,d,y,'','',/sbd|matrix/i.test(best.identifier)?'sbd':'aud',gen);
+  }catch(e){
+    clearTimeout(tid);
+    if(gen!==loadGen) return;
+    setStatus('err',`☠ ARCHIVE OFFLINE`);
+  }
 }
 
 // ── Load show ─────────────────────────────────────────────────────────────────
-async function loadShow(identifier,m,d,y,venue,city,type){
+async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen){
   try{
     const r=await fetch(`https://archive.org/metadata/${identifier}`);
+    if(gen!==loadGen) return;
     const meta=await r.json();
+    if(gen!==loadGen) return;
     const allMp3s=(meta.files||[]).filter(f=>f.name.toLowerCase().endsWith('.mp3'));
     // Prefer full-quality over low-bitrate duplicates; filter known low-quality variants
     const hiQ=allMp3s.filter(f=>!/[._](64|128)kb?\.mp3$/i.test(f.name)&&!/_vbr\.mp3$/i.test(f.name));
@@ -1175,39 +1188,40 @@ function updateActive(){
 
 // ── Playback ──────────────────────────────────────────────────────────────────
 function playTrack(i){
-  if(i<0||i>=tracks.length) return;
+  if(!tracks.length||i<0||i>=tracks.length) return;
   currentTrack=i;
   audio.src=tracks[i].url;
-  audio.load();
   audio.play().catch(()=>{});
   document.getElementById('play-pause-btn').classList.remove('paused');
   updateActive();
 }
 function togglePlay(){
-  if(audio.paused){audio.play();document.getElementById('play-pause-btn').classList.remove('paused');}
+  if(!tracks.length) return;
+  if(audio.paused){audio.play().catch(()=>{});document.getElementById('play-pause-btn').classList.remove('paused');}
   else{audio.pause();document.getElementById('play-pause-btn').classList.add('paused');}
 }
 function prevTrack(){audio.currentTime>3?audio.currentTime=0:playTrack(Math.max(0,currentTrack-1));}
-function nextTrack(){playTrack(Math.min(tracks.length-1,currentTrack+1));}
-audio.addEventListener('ended', () => {
-  if (currentTrack < tracks.length - 1) {
-    currentTrack++;
-    audio.src = tracks[currentTrack].url;
-    audio.load();
-    audio.play().catch(()=>{});
-    document.getElementById('play-pause-btn').classList.remove('paused');
-    updateActive();
-  } else {
-    document.getElementById('play-pause-btn').classList.add('paused');
-  }
+function nextTrack(){if(currentTrack<tracks.length-1) playTrack(currentTrack+1);}
+audio.addEventListener('ended',()=>{
+  if(currentTrack<tracks.length-1) playTrack(currentTrack+1);
+  else document.getElementById('play-pause-btn').classList.add('paused');
 });
-let seeking=false;
+audio.addEventListener('error',()=>{
+  if(tracks.length&&currentTrack<tracks.length-1) setTimeout(()=>playTrack(currentTrack+1),800);
+  else document.getElementById('play-pause-btn').classList.add('paused');
+});
+let seeking=false, rafPending=false;
 audio.addEventListener('timeupdate',()=>{
-  if(!audio.duration||seeking) return;
-  const pct=(audio.currentTime/audio.duration*100)+'%';
-  document.getElementById('progress-fill').style.width=pct;
-  document.getElementById('progress-thumb').style.left=pct;
-  document.getElementById('time-display').textContent=`${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+  if(!audio.duration||seeking||rafPending) return;
+  rafPending=true;
+  requestAnimationFrame(()=>{
+    rafPending=false;
+    if(!audio.duration||seeking) return;
+    const pct=(audio.currentTime/audio.duration*100)+'%';
+    document.getElementById('progress-fill').style.width=pct;
+    document.getElementById('progress-thumb').style.left=pct;
+    document.getElementById('time-display').textContent=`${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+  });
 });
 (function(){
   const wrap=document.getElementById('progress-wrap');
@@ -1335,15 +1349,23 @@ function renderFaves(){
 }
 
 // ── Show navigation ──────────────────────────────────────────────────────────
+function showNavIdx(){
+  if(!currentShow||!ALL_SHOWS.length) return -1;
+  let idx=ALL_SHOWS.findIndex(s=>s.date===currentShow.date);
+  if(idx===-1){
+    // Show loaded via archive search, not in list — find insertion point
+    idx=ALL_SHOWS.findIndex(s=>s.date>currentShow.date);
+    if(idx===-1) idx=ALL_SHOWS.length; // after all
+  }
+  return idx;
+}
 function prevShow(){
-  if(!currentShow||!ALL_SHOWS.length) return;
-  const idx=ALL_SHOWS.findIndex(s=>s.date===currentShow.date);
+  const idx=showNavIdx();
   if(idx>0) dialShow(ALL_SHOWS[idx-1].date);
 }
 function nextShow(){
-  if(!currentShow||!ALL_SHOWS.length) return;
-  const idx=ALL_SHOWS.findIndex(s=>s.date===currentShow.date);
-  if(idx<ALL_SHOWS.length-1) dialShow(ALL_SHOWS[idx+1].date);
+  const idx=showNavIdx();
+  if(idx!==-1&&idx<ALL_SHOWS.length-1) dialShow(ALL_SHOWS[idx+1].date);
 }
 
 // ── Purist mode ───────────────────────────────────────────────────────────────

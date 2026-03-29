@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>DIAL-A-DEAD</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 :root{--pink:#FF1493;--green:#39FF14;--blue:#00BFFF;}
@@ -273,33 +272,6 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
   line-height:1;transition:color .15s;
 }
 .show-nav-btn:hover{color:#FF1493;}
-.show-dl-btn{
-  background:transparent;border:1px solid #FF149344;border-radius:4px;
-  color:#FF149388;font-family:'Share Tech Mono',monospace;
-  font-size:9px;letter-spacing:2px;cursor:pointer;
-  padding:3px 6px;transition:color .15s,border-color .15s;white-space:nowrap;
-  -webkit-appearance:none;appearance:none;
-}
-.show-dl-btn:hover{color:#FF1493;border-color:#FF1493;}
-.show-dl-btn:active{opacity:.7;}
-.show-dl-btn.loading{color:#FF1493;border-color:#FF149366;}
-.dl-dot{display:inline-block;width:4px;height:4px;border-radius:50%;background:#39FF14;box-shadow:0 0 4px #39FF14;margin-left:4px;vertical-align:middle;animation:blink .7s step-start infinite;}
-html.purist .dl-dot{background:#CC0000;box-shadow:none;}
-.show-dl-progress{
-  display:none;height:3px;border-radius:2px;margin-top:4px;
-  background:#1a1a1a;overflow:hidden;width:100%;
-}
-.show-dl-progress.visible{display:block;}
-.show-dl-progress-fill{
-  height:100%;width:0%;border-radius:2px;
-  background:#39FF14;box-shadow:0 0 6px #39FF1488;
-  transition:width .3s ease;
-}
-html.purist .show-dl-btn{color:#CC000055;border-color:#CC000033;}
-html.purist .show-dl-btn:hover{color:#CC0000;border-color:#CC0000;}
-html.purist .show-dl-btn.loading{color:#CC0000;border-color:#CC000066;}
-html.purist .show-dl-progress{background:#eeeeee;}
-html.purist .show-dl-progress-fill{background:#CC0000;box-shadow:none;}
 .show-date-big{
   font-family:'Orbitron',monospace;
   font-size:clamp(14px,4.5vw,17px);font-weight:900;
@@ -814,10 +786,6 @@ html.purist .setup-box p{color:#555555;}
       <div class="show-nav-arrows">
         <button class="show-nav-btn" onclick="prevShow();this.blur()">←<span class="nav-label">PREV</span></button>
         <button class="show-nav-btn" onclick="nextShow();this.blur()">→<span class="nav-label">NEXT</span></button>
-        <div style="display:flex;flex-direction:column;align-items:stretch;">
-          <button class="show-dl-btn" id="show-dl-btn" onclick="dlShow(this)">⬇ DL SHOW</button>
-          <div class="show-dl-progress" id="show-dl-progress"><div class="show-dl-progress-fill" id="show-dl-fill"></div></div>
-        </div>
       </div>
     </div>
     <div class="show-venue-big" id="show-venue-big"></div>
@@ -1143,38 +1111,6 @@ async function dlTrack(i,btn){
     setTimeout(()=>URL.revokeObjectURL(a.href),15000);
     btn.textContent='✓';setTimeout(()=>{btn.textContent=orig;},2000);
   }catch(e){btn.textContent='ERR';setTimeout(()=>{btn.textContent=orig;},2000);}
-  finally{btn.classList.remove('loading');}
-}
-async function dlShow(btn){
-  if(!tracks.length) return;
-  const orig=btn.textContent;
-  const bar=document.getElementById('show-dl-progress');
-  const fill=document.getElementById('show-dl-fill');
-  btn.classList.add('loading');
-  bar.classList.add('visible');
-  fill.style.width='0%';
-  try{
-    const zip=new JSZip();
-    for(let i=0;i<tracks.length;i++){
-      btn.innerHTML=`${i+1} / ${tracks.length}<span class="dl-dot"></span>`;
-      const t=tracks[i];
-      const r=await fetchWithTimeout(t.url,30000,{cache:'no-store'});
-      zip.file(`${String(i+1).padStart(2,'0')} ${(t.name||`track-${i+1}`).replace(/[^\w\s-]/g,'').trim()}.mp3`, await r.arrayBuffer());
-      fill.style.width=`${Math.round((i+1)/tracks.length*100)}%`;
-    }
-    btn.innerHTML=`SAVING...<span class="dl-dot"></span>`;
-    const blob=await zip.generateAsync({type:'blob',compression:'STORE'});
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download=`GD-${(currentShow?.date||'show').replace(/\//g,'-')}.zip`;
-    a.click();
-    setTimeout(()=>URL.revokeObjectURL(a.href),15000);
-    btn.textContent='✓ DONE';
-    setTimeout(()=>{btn.innerHTML=orig;bar.classList.remove('visible');fill.style.width='0%';},3000);
-  }catch(e){
-    btn.textContent='ERR';
-    setTimeout(()=>{btn.innerHTML=orig;bar.classList.remove('visible');fill.style.width='0%';},2500);
-  }
   finally{btn.classList.remove('loading');}
 }
 function updateActive(){

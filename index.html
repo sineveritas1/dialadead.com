@@ -873,7 +873,7 @@ function toggleArchive(){
 // ── Load shows.json ───────────────────────────────────────────────────────────
 async function init(){
   try{
-    const r=await fetch('./shows.json');
+    const r=await fetchWithTimeout('./shows.json',10000);
     if(!r.ok) throw new Error(`HTTP ${r.status}`);
     const data=await r.json();
     SHOW_MAP=data;
@@ -1000,7 +1000,7 @@ async function engage(){
 // ── Load show ─────────────────────────────────────────────────────────────────
 async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen){
   try{
-    const r=await fetch(`https://archive.org/metadata/${identifier}`);
+    const r=await fetchWithTimeout(`https://archive.org/metadata/${identifier}`,15000);
     if(gen!==loadGen) return;
     const meta=await r.json();
     if(gen!==loadGen) return;
@@ -1107,7 +1107,10 @@ async function dlTrack(i,btn){
     const a=document.createElement('a');
     a.href=URL.createObjectURL(blob);
     a.download=(t.name||`track-${i+1}`).replace(/[^\w\s-]/g,'').trim()+'.mp3';
+    a.style.display='none';
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     setTimeout(()=>URL.revokeObjectURL(a.href),15000);
     btn.textContent='✓';setTimeout(()=>{btn.textContent=orig;},2000);
   }catch(e){btn.textContent='ERR';setTimeout(()=>{btn.textContent=orig;},2000);}
@@ -1123,13 +1126,16 @@ function updateActive(){
 }
 
 // ── Playback ──────────────────────────────────────────────────────────────────
+let playGen=0;
 function playTrack(i){
   if(!tracks.length||i<0||i>=tracks.length) return;
+  const gen=++playGen;
   currentTrack=i;
   audio.pause();
   audio.src='';
   audio.src=tracks[i].url;
-  audio.play().catch(()=>{});
+  const p=audio.play();
+  if(p) p.catch(e=>{if(gen!==playGen||e.name==='AbortError') return;});
   document.getElementById('play-pause-btn').classList.remove('paused');
   updateActive();
 }
@@ -1144,12 +1150,13 @@ audio.addEventListener('ended',()=>{
   if(currentTrack<tracks.length-1) playTrack(currentTrack+1);
   else document.getElementById('play-pause-btn').classList.add('paused');
 });
-let lastErrTrack=-1;
 audio.addEventListener('error',()=>{
-  if(currentTrack===lastErrTrack) return;
-  lastErrTrack=currentTrack;
-  if(tracks.length&&currentTrack<tracks.length-1) setTimeout(()=>playTrack(currentTrack+1),800);
-  else document.getElementById('play-pause-btn').classList.add('paused');
+  const gen=playGen;
+  if(tracks.length&&currentTrack<tracks.length-1){
+    setTimeout(()=>{if(gen===playGen) playTrack(currentTrack+1);},800);
+  }else{
+    document.getElementById('play-pause-btn').classList.add('paused');
+  }
 });
 let seeking=false, rafPending=false;
 audio.addEventListener('timeupdate',()=>{

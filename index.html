@@ -282,9 +282,10 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
 }
 .show-dl-btn:hover{color:#FF1493;border-color:#FF1493;}
 .show-dl-btn:active{opacity:.7;}
-.show-dl-btn.loading{opacity:.4;cursor:wait;}
+.show-dl-btn.loading{cursor:wait;background:linear-gradient(to right,#FF149333 var(--dl-pct,0%),transparent var(--dl-pct,0%));border-color:#FF149366;}
 html.purist .show-dl-btn{color:#CC000055;border-color:#CC000033;}
 html.purist .show-dl-btn:hover{color:#CC0000;border-color:#CC0000;}
+html.purist .show-dl-btn.loading{background:linear-gradient(to right,#CC000022 var(--dl-pct,0%),transparent var(--dl-pct,0%));border-color:#CC000066;}
 .show-date-big{
   font-family:'Orbitron',monospace;
   font-size:clamp(14px,4.5vw,17px);font-weight:900;
@@ -1120,11 +1121,13 @@ async function dlShow(btn){
   btn.classList.add('loading');
   try{
     const zip=new JSZip();
+    btn.style.setProperty('--dl-pct','0%');
     for(let i=0;i<tracks.length;i++){
-      btn.textContent=`${i+1}/${tracks.length}`;
+      btn.textContent=`${i+1} / ${tracks.length}`;
       const t=tracks[i];
       const r=await fetchWithTimeout(t.url,30000);
       zip.file(`${String(i+1).padStart(2,'0')} ${(t.name||`track-${i+1}`).replace(/[^\w\s-]/g,'').trim()}.mp3`, await r.arrayBuffer());
+      btn.style.setProperty('--dl-pct',`${Math.round((i+1)/tracks.length*100)}%`);
     }
     btn.textContent='SAVING...';
     const blob=await zip.generateAsync({type:'blob',compression:'STORE'});

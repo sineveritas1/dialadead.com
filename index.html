@@ -18,6 +18,9 @@
 <link rel="shortcut icon" type="image/png" href="Skull.png">
 <link rel="icon" type="image/png" href="Skull.png">
 <link rel="apple-touch-icon" href="Skull.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DIAL-A-DEAD">
 <meta name="theme-color" content="#FF1493">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://dialadead.com/">
@@ -974,6 +977,18 @@ function checkUrlDate(){
 
 init();
 checkUrlDate();
+</script>
+<script>
+(function(){
+  const isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone=window.navigator.standalone;
+  if(!isIos||isStandalone||localStorage.getItem('iosPromptDismissed')) return;
+  const b=document.createElement('div');
+  b.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111;color:#ddd;padding:14px 18px;border-radius:10px;font-family:"Share Tech Mono",monospace;font-size:12px;text-align:center;z-index:9999;max-width:270px;border:1px solid #FF149366;box-shadow:0 0 18px #FF149333;';
+  b.innerHTML='☠ INSTALL DIAL-A-DEAD<br><span style="color:#aaa;font-size:11px;">Tap <strong style="color:#FF1493">Share ↑</strong> → <strong style="color:#FF1493">Add to Home Screen</strong></span><br><br><span id="_iosX" style="color:#555;cursor:pointer;font-size:10px;letter-spacing:1px;">DISMISS</span>';
+  document.body.appendChild(b);
+  document.getElementById('_iosX').onclick=function(){b.remove();localStorage.setItem('iosPromptDismissed','1');};
+})();
 </script>
 </body>
 </html>

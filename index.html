@@ -798,7 +798,10 @@ async function engage(){
   }
   try{
     const q=`collection:(GratefulDead) AND date:${key}`;
-    const r=await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}&fl[]=identifier&rows=20&output=json`);
+    const sc=new AbortController();
+    const st=setTimeout(()=>sc.abort(),10000);
+    const r=await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}&fl[]=identifier&rows=20&output=json`,{signal:sc.signal});
+    clearTimeout(st);
     const data=await r.json();
     const docs=data.response?.docs||[];
     if(!docs.length){setStatus('err',`☠ NO SHOW: ${ms}/${ds}/${y}<br><span style="font-size:9px">THE DEAD DID NOT PLAY THIS NIGHT</span>`);return;}
@@ -816,7 +819,16 @@ async function engage(){
 // ── Load show ─────────────────────────────────────────────────────────────────
 async function loadShow(identifier,m,d,y,venue,city,type,isPartial=false){
   try{
-    const r=await fetch(`https://archive.org/metadata/${identifier}`);
+    // Stop and reset audio before loading a new show
+    audio.pause();
+    audio.src='';
+    document.getElementById('play-pause-btn').textContent='▶';
+    document.getElementById('time-display').textContent='0:00 / —';
+    document.getElementById('progress-fill').style.width='0%';
+    const ctrl=new AbortController();
+    const timeout=setTimeout(()=>ctrl.abort(),12000);
+    const r=await fetch(`https://archive.org/metadata/${identifier}`,{signal:ctrl.signal});
+    clearTimeout(timeout);
     const meta=await r.json();
     // Deduplicate: Archive.org generates multiple MP3 variants per track (_vbr, _64kb, etc.)
     // Group by original source file and keep the cleanest MP3 per track
@@ -887,31 +899,30 @@ function playTrack(i){
   if(i<0||i>=tracks.length) return;
   currentTrack=i;
   audio.src=tracks[i].url;
-  audio.load();
   audio.play().catch(()=>{});
-  document.getElementById('play-pause-btn').textContent='⏸';
   updateActive();
 }
 function togglePlay(){
-  if(audio.paused){audio.play();document.getElementById('play-pause-btn').textContent='⏸';}
-  else{audio.pause();document.getElementById('play-pause-btn').textContent='▶';}
+  if(audio.paused) audio.play().catch(()=>{});
+  else audio.pause();
 }
 function prevTrack(){audio.currentTime>3?audio.currentTime=0:playTrack(Math.max(0,currentTrack-1));}
-function nextTrack(){playTrack(Math.min(tracks.length-1,currentTrack+1));}
-audio.addEventListener('ended', () => {
-  if (currentTrack < tracks.length - 1) {
-    currentTrack++;
-    audio.src = tracks[currentTrack].url;
-    audio.load();
-    audio.play().catch(()=>{});
-    document.getElementById('play-pause-btn').textContent = '⏸';
-    updateActive();
-  } else {
-    document.getElementById('play-pause-btn').textContent = '▶';
-  }
+function nextTrack(){if(currentTrack<tracks.length-1)playTrack(currentTrack+1);}
+
+// Drive button state entirely from audio events — never set it manually elsewhere
+const btn=()=>document.getElementById('play-pause-btn');
+audio.addEventListener('play',    ()=>btn().textContent='⏸');
+audio.addEventListener('pause',   ()=>btn().textContent='▶');
+audio.addEventListener('ended',   ()=>nextTrack());
+audio.addEventListener('waiting', ()=>btn().textContent='⟳');
+audio.addEventListener('playing', ()=>btn().textContent='⏸');
+audio.addEventListener('error',   ()=>{
+  // Skip unplayable track rather than hanging
+  if(currentTrack<tracks.length-1) setTimeout(()=>playTrack(currentTrack+1),800);
+  else btn().textContent='▶';
 });
 audio.addEventListener('timeupdate',()=>{
-  if(!audio.duration) return;
+  if(!audio.duration||isNaN(audio.duration)) return;
   document.getElementById('progress-fill').style.width=(audio.currentTime/audio.duration*100)+'%';
   document.getElementById('time-display').textContent=`${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
 });

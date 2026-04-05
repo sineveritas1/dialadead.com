@@ -311,7 +311,13 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
 }
 .show-meta{
   font-size:9px;color:#39FF14cc;
-  letter-spacing:1px;margin-bottom:14px;
+  letter-spacing:1px;margin-bottom:6px;
+}
+.partial-warn{
+  font-size:9px;letter-spacing:1px;
+  color:#050505;background:#FF1493;
+  display:inline-block;padding:2px 7px;
+  border-radius:2px;margin-bottom:10px;
 }
 
 /* Transport */
@@ -458,6 +464,7 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
 .show-src{font-size:8px;letter-spacing:1px;margin-top:1px;}
 .show-src.sbd{color:#39FF14cc;}
 .show-src.aud{color:#00BFFF88;}
+.show-partial{font-size:7px;letter-spacing:1px;color:#FF149388;margin-top:1px;}
 
 .setup-box{
   background:#0a0500;border:1px solid #FF149333;border-radius:8px;
@@ -582,6 +589,7 @@ input { color-scheme: dark; }
     <div class="show-date-big" id="show-date-big"></div>
     <div class="show-venue-big" id="show-venue-big"></div>
     <div class="show-meta" id="show-meta"></div>
+    <div class="partial-warn" id="partial-warn" style="display:none"></div>
     <div class="share-row"><button class="btn-share" onclick="shareShow()">⤴ SHARE THIS SHOW</button></div>
 
     <div class="transport">
@@ -709,6 +717,7 @@ function renderShows(list){
       <div class="show-venue">${s.venue||'—'}</div>
       <div class="show-city">${s.city||''}</div>
       <div class="show-src ${s.type||'aud'}">${(s.type||'aud')==='sbd'?'▸ SBD':'▸ AUD'}</div>
+      ${s.partial?`<div class="show-partial">${s.partial==='set1'?'S1 ONLY':'PARTIAL'}</div>`:''}
     </div>`;
   }).join('');
 }
@@ -751,24 +760,54 @@ async function engage(){
   setTimeout(()=>document.getElementById('ebtn').style.animation='',450);
   document.getElementById('player-panel').classList.remove('visible');
   setStatus('',`<span class="loading">⟳</span> SCANNING FOR ${ms}/${ds}/${y}...`);
-  if(SHOW_MAP[key]){const s=SHOW_MAP[key];await loadShow(s.id,m,d,y,s.venue,s.city,s.type);return;}
+  if(SHOW_MAP[key]){
+    const s=SHOW_MAP[key];
+    if(s.partial){
+      // Known partial — search for a complete recording first
+      setStatus('',`<span class="loading">⟳</span> SCANNING FOR COMPLETE ${ms}/${ds}/${y}...`);
+      try{
+        const q=`collection:(GratefulDead) AND date:${key}`;
+        const r=await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}&fl[]=identifier&rows=20&output=json`);
+        const data=await r.json();
+        const docs=data.response?.docs||[];
+        const isKnownPartial=id=>/partial|set1|pset1|[._-]s1[._-]|set1p|\.s1\b/i.test(id);
+        const complete=docs.filter(d=>!isKnownPartial(d.identifier)&&d.identifier!==s.id);
+        if(complete.length){
+          const best=complete.sort((a,b)=>{
+            const score=id=>(/sbd|matrix/i.test(id)?2:0)-(/[._]d[12][._]/i.test(id)?1:0);
+            return score(b.identifier)-score(a.identifier);
+          })[0];
+          await loadShow(best.identifier,m,d,y,s.venue,s.city,/sbd|matrix/i.test(best.identifier)?'sbd':'aud');
+          return;
+        }
+      }catch(e){}
+      // No complete version found — load partial with warning
+      await loadShow(s.id,m,d,y,s.venue,s.city,s.type,s.partial);
+      return;
+    }
+    await loadShow(s.id,m,d,y,s.venue,s.city,s.type);
+    return;
+  }
   try{
     const q=`collection:(GratefulDead) AND date:${key}`;
-    const r=await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}&fl[]=identifier&rows=10&output=json`);
+    const r=await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}&fl[]=identifier&rows=20&output=json`);
     const data=await r.json();
     const docs=data.response?.docs||[];
     if(!docs.length){setStatus('err',`☠ NO SHOW: ${ms}/${ds}/${y}<br><span style="font-size:9px">THE DEAD DID NOT PLAY THIS NIGHT</span>`);return;}
-    const best=docs.sort((a,b)=>{
-      // Prefer sbd/matrix; penalize disc-split items (.d1. .d2.) that only have half a show
+    const isKnownPartial=id=>/partial|set1|pset1|[._-]s1[._-]|set1p|\.s1\b/i.test(id);
+    const complete=docs.filter(d=>!isKnownPartial(d.identifier));
+    const pool=complete.length?complete:docs;
+    const best=pool.sort((a,b)=>{
       const score=id=>(/sbd|matrix/i.test(id)?2:0)-(/[._]d[12][._]/i.test(id)?1:0);
       return score(b.identifier)-score(a.identifier);
     })[0];
-    await loadShow(best.identifier,m,d,y,'','',/sbd|matrix/i.test(best.identifier)?'sbd':'aud');
+    const partial=isKnownPartial(best.identifier)?best.identifier===docs[0]?.identifier&&complete.length===0?'partial':false:false;
+    await loadShow(best.identifier,m,d,y,'','',/sbd|matrix/i.test(best.identifier)?'sbd':'aud',partial);
   }catch(e){setStatus('err',`☠ ARCHIVE OFFLINE`);}
 }
 
 // ── Load show ─────────────────────────────────────────────────────────────────
-async function loadShow(identifier,m,d,y,venue,city,type){
+async function loadShow(identifier,m,d,y,venue,city,type,isPartial=false){
   try{
     const r=await fetch(`https://archive.org/metadata/${identifier}`);
     const meta=await r.json();
@@ -791,6 +830,11 @@ async function loadShow(identifier,m,d,y,venue,city,type){
     document.getElementById('show-venue-big').textContent=`${v}${c?' · '+c:''}`;
     document.getElementById('show-meta').textContent=`${mp3s.length} TRACKS · ${isSbd?'SOUNDBOARD':'AUDIENCE TAPE'}`;
     document.getElementById('track-count').textContent=`${mp3s.length} TRACKS`;
+    const pw=document.getElementById('partial-warn');
+    if(isPartial){
+      pw.textContent=isPartial==='set1'?'⚠ SET 1 ONLY — COMPLETE SHOW NOT ON ARCHIVE':'⚠ PARTIAL RECORDING — INCOMPLETE TAPE';
+      pw.style.display='block';
+    }else{pw.style.display='none';}
     tracks=mp3s.map(f=>({name:cleanName(f.title||f.name),url:`https://archive.org/download/${identifier}/${encodeURIComponent(f.name)}`,duration:f.length||0}));
     currentTrack=0;
     buildTracklist();

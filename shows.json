@@ -81,7 +81,8 @@
     "id": "gd1966-05-19.136656.set1.sbd.sirmick.flac16",
     "venue": "Avalon Ballroom",
     "city": "San Francisco, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1966-06-01": {
     "id": "gd1966-06-01.136642.watts.sbd.mr.dat48k.sirmick.flac16",
@@ -171,7 +172,8 @@
     "id": "gd1966-11-18.169429.sbd-partial.flegel.flac1648",
     "venue": "Fillmore Auditorium",
     "city": "San Francisco, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1966-11-19": {
     "id": "gd1966-11-19.sbd.miller.94106.sbeok.flac16",
@@ -285,7 +287,8 @@
     "id": "gd67-09-04.sbd.partial.jools.19514.19526.sbeok.shnf",
     "venue": "Dance Hall",
     "city": "Rio Nido, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1967-09-15": {
     "id": "gd67-09-15.aud.vernon.9192.sbeok.shnf",
@@ -453,13 +456,15 @@
     "id": "gd1968-08-22.143144.sbd.partial.miller.gastwirt.sirmick.flac1648",
     "venue": "Fillmore West",
     "city": "San Francisco, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1968-08-23": {
     "id": "gd1968-08-23.143130.sbd.partial.miller.gastwirt.sirmick.flac1644",
     "venue": "Shrine Auditorium",
     "city": "Los Angeles, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1968-08-28": {
     "id": "gd1968-08-28.sbd.vernon.10162.sbeok.shnf",
@@ -807,7 +812,8 @@
     "id": "gd1969-04-23.partial.sbd.gems.98793.flac24",
     "venue": "The Ark",
     "city": "Boston, MA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1969-04-25": {
     "id": "gd1969-04-25.sbd.miller.97392.sbeok.flac16",
@@ -831,7 +837,8 @@
     "id": "gd1969-05-03.sbd.partial.miller.95138.sbeok.flac16",
     "venue": "Winterland Arena",
     "city": "San Francisco, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1969-05-07": {
     "id": "gd1969-05-07.sbd.des.5179.sbeok.shnf",
@@ -1095,13 +1102,15 @@
     "id": "gd69-09-29.aud.early.hollister.79.sbeok.shnf",
     "venue": "Cafe au Go-Go",
     "city": "New York City, NY",
-    "type": "aud"
+    "type": "aud",
+    "partial": "partial"
   },
   "1969-09-30": {
     "id": "gd69-09-30.aud.early.hollister.80.sbeok.shnf",
     "venue": "Cafe au Go-Go",
     "city": "New York City, NY",
-    "type": "aud"
+    "type": "aud",
+    "partial": "partial"
   },
   "1969-10-24": {
     "id": "gd1969-10-24.aud.unknown.seaweed.122194.flac1644",
@@ -1611,7 +1620,8 @@
     "id": "gd1970-07-16.140310.sbd-partial.miller.sirmick.flac1644",
     "venue": "Euphoria Ballroom",
     "city": "San Rafael, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1970-07-30": {
     "id": "gd1970-07-30.sbd.boswell.smith.114020.flac16",
@@ -1851,7 +1861,8 @@
     "id": "gd1971-01-21.153406.sbd.partial.martin.smith.clugston.flac1648",
     "venue": "Freeborn Hall, University of California",
     "city": "Davis, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1971-01-22": {
     "id": "gd71-01-22.sbd.cotsman.12592.sbeok.shnf",
@@ -2475,13 +2486,15 @@
     "id": "gd1972-05-04.141434.partial.sbd.betty.lubar.dalton.miller.sirmick.flac1644",
     "venue": "Olympia Theater",
     "city": "Paris, France",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1972-05-07": {
     "id": "gd1972-05-07.133598.sbd.set1.miller.flac16",
     "venue": "Bickershaw Festival",
     "city": "Wigan, England",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1972-05-10": {
     "id": "gd72-05-10.sbd.kaplan.1582.sbeok.shnf",
@@ -2589,7 +2602,8 @@
     "id": "gd1972-08-20.pset1.sbd.jim.14988.shnf",
     "venue": "San Jose Civic Auditorium",
     "city": "San Jose, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1972-08-21": {
     "id": "gd1972-08-21.139581.sbd.miller.sirmick.fixed.flac16",
@@ -2661,7 +2675,8 @@
     "id": "gd1972-09-19.152468.s1-s2p.aud.flac2448",
     "venue": "Roosevelt Stadium",
     "city": "Jersey City, NJ",
-    "type": "aud"
+    "type": "aud",
+    "partial": "set1"
   },
   "1972-09-21": {
     "id": "gd1972-09-21.138083.sbd.mitchell-flaschner.flac1644",
@@ -2913,7 +2928,8 @@
     "id": "gd73-02-24.pset1-sbd.sly.16051.sbeok.shnf",
     "venue": "University of Iowa",
     "city": "Iowa City, IA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1973-02-26": {
     "id": "gd1973-02-26.167612.sbd.roman.revision.flac1644",
@@ -2997,7 +3013,8 @@
     "id": "gd1973-05-13.sbd.partial.smith.miller.100239.sbeok.flac16",
     "venue": "Iowa State Fairgrounds",
     "city": "Des Moines, IA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1973-05-20": {
     "id": "gd1973-05-20.sbd-set3.wow.16158.shnf",
@@ -3207,7 +3224,8 @@
     "id": "gd1973-11-10.140704.set1p.set2p.sbd.pcm.miller.clugston.flac1644",
     "venue": "Winterland Arena",
     "city": "San Francisco, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1973-11-11": {
     "id": "gd1973-11-11.sbd.gardner.12178.sbeok.shnf",
@@ -3393,7 +3411,8 @@
     "id": "gd1974-06-16.143135.sbd.partial.gastwirt.sirmick.miller.flac1644",
     "venue": "Des Moines State Fair Grandstand",
     "city": "Des Moines, IA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1974-06-18": {
     "id": "gd1974-06-18.sbd.bertha-ashley.18150.sbeok.shnf",
@@ -3495,7 +3514,8 @@
     "id": "gd1974-09-09.135635.partial.sbd.phillips.flac16",
     "venue": "Alexandra Palace",
     "city": "London, England",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1974-09-10": {
     "id": "gd1974-09-10.135699.sbd.new.patched.miller.flac16",
@@ -3555,7 +3575,8 @@
     "id": "gd1974-10-19.112531.sbd.BEAR.partial.twotapesides.flac24",
     "venue": "Winterland Arena",
     "city": "San Francisco, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1974-10-20": {
     "id": "gd1974-10-20.132112.sbd.boswell-smith.flac24",
@@ -3735,7 +3756,8 @@
     "id": "gd1976-06-04.143064.set1-pset2.sbd.miller.flac2496",
     "venue": "Paramount Theatre",
     "city": "Portland, OR",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1976-06-09": {
     "id": "gd1976-06-09.sbd-set2.cohen.12207.shnf",
@@ -4047,7 +4069,8 @@
     "id": "gd1977-04-25.141715.s1.sbd.miller.flac2496",
     "venue": "Capitol Theater",
     "city": "Passaic, NJ",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1977-04-26": {
     "id": "gd77-04-26.aud.goodbear.260.sbefail.shnf",
@@ -4083,7 +4106,8 @@
     "id": "gd77-05-03.set1-sbd.miller.21646.sbeok.shnf",
     "venue": "The Palladium",
     "city": "NYC, NY",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1977-05-04": {
     "id": "gd1977-05-04.sbd.miller.91970.sbeok.flac16",
@@ -4431,7 +4455,8 @@
     "id": "gd1978-01-22.sbd-partial.unknown.287.sbeok.shnf",
     "venue": "MacArthur Court - University of Oregon",
     "city": "Eugene, OR",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1978-01-30": {
     "id": "gd1978-01-30.148564.sbd.latvala.wise.miller.clugston.flac16",
@@ -4749,7 +4774,8 @@
     "id": "gd1979-11-08.set1.sbd.kolber-lai.8409.shnf",
     "venue": "Capitol Center",
     "city": "Landover, MD",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1978-11-13": {
     "id": "gd1978-11-13.aud.unknown.119996.sbeok.flac16",
@@ -4767,13 +4793,15 @@
     "id": "gd1978-11-16.136718.sbd.partial.flac1644",
     "venue": "Uptown Theater",
     "city": "Chicago, IL",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1978-11-17": {
     "id": "gd1978-11-17.135718.sbd.partial.schley.andrewf.flac1644",
     "venue": "Uptown Theater",
     "city": "Chicago, IL",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1978-11-18": {
     "id": "gd1978-11-18.sbd.miller.81131.sbeok.flac16",
@@ -4845,7 +4873,8 @@
     "id": "gd1978-12-19.set1.sbd.miller.102429.flac16",
     "venue": "Memorial Coliseum, Mississippi State Fairgrounds",
     "city": "Jackson, MS",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1978-12-21": {
     "id": "gd1978-12-21.170411.sbd.miller.flac2496",
@@ -4965,7 +4994,8 @@
     "id": "gd1979-02-03.set1.sbd.fixed-102851.miller.102876.flac16",
     "venue": "Market Square Arena",
     "city": "Indianapolis, IN",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1979-02-04": {
     "id": "gd1979-02-04.154716.aud.clugston.flac1648",
@@ -4983,7 +5013,8 @@
     "id": "gd1979-02-07.set1-sbd.andrewf.86941.flac16",
     "venue": "SIU Arena, University Of Souther Illinois",
     "city": "Carbondale, IL",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1979-02-09": {
     "id": "gd1979-02-09.144050.aud.unknown.gagne.smith.miller.clugston.flac1648",
@@ -5169,13 +5200,15 @@
     "id": "gd1979-10-24.148162.s1.sbd.flac16",
     "venue": "Springfield Civic Center",
     "city": "Springfield, MA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1979-10-25": {
     "id": "gd1979-10-25.aud-set1.sbd-set2.miller.22311.shnf",
     "venue": "New Haven Coliseum",
     "city": "New Haven, CT",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1979-10-27": {
     "id": "gd1979-10-27.sbd-set2.kaplan.28832.sbeok.shnf",
@@ -5331,7 +5364,8 @@
     "id": "gd1979-12-27.set1.sbd.miller.81601.sbeok.flac16",
     "venue": "Oakland Auditorium Arena",
     "city": "Oakland, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1979-12-28": {
     "id": "gd1979-12-28.134499.sbd.miller.flac16",
@@ -5565,7 +5599,8 @@
     "id": "gd80-06-29.set1-sbd.16438.sbeok.shnf",
     "venue": "Pauley Pavilion, UCLA",
     "city": "Los Angeles, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1980-07-01": {
     "id": "gd1980-07-01.125844.sbd.mason.flac16",
@@ -5577,7 +5612,8 @@
     "id": "gd1980-08-16.128616.naks.mason.partial.flac16",
     "venue": "Southern Illinois University",
     "city": "Edwardsville, IL",
-    "type": "aud"
+    "type": "aud",
+    "partial": "partial"
   },
   "1980-08-17": {
     "id": "gd1980-08-17.sbd.miller.93037.sbeok.flac16",
@@ -5595,7 +5631,8 @@
     "id": "gd1980-08-20.147366.s1.sbd.miller.flac24",
     "venue": "Uptown Theater",
     "city": "Chicago, IL",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1980-08-21": {
     "id": "gd1980-08-21.175121.sbd.phase-repair.miller.flac1644",
@@ -5643,7 +5680,8 @@
     "id": "gd1980-08-31.139642.set1-aud.set2-sbd.flac1644",
     "venue": "Capital Centre",
     "city": "Landover, MD",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1980-09-02": {
     "id": "gd1980-09-02.175070.sbd.miller.remaster.flac1644",
@@ -5679,7 +5717,8 @@
     "id": "gd1980-09-26.155411.s1-ps2.sbd.miller.flac24",
     "venue": "Warfield Theater",
     "city": "San Francisco, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1980-09-27": {
     "id": "gd1980-09-27.155740.sbd.miller.flac2496",
@@ -5721,7 +5760,8 @@
     "id": "gd1980-10-04.141334.sbd.set1-2p.betty.pcm.dalton.miller.clugston.flac1644",
     "venue": "Warfield Theater",
     "city": "San Francisco, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1980-10-06": {
     "id": "gd1980-10-06.135936.sbd.GEMS.flac16",
@@ -5739,7 +5779,8 @@
     "id": "gd1980-10-09.140924.set1p.sbd.betty.pcm.dalton.miller.clugston.flac1644",
     "venue": "Warfield Theater",
     "city": "San Francisco, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1980-10-10": {
     "id": "gd1980-10-10.sbd-acoustic.willy.8780.sbeok.shnf",
@@ -5811,7 +5852,8 @@
     "id": "gd1980-10-29.140301.sbd-partial.miller.sirmick.flac1644",
     "venue": "Radio City Music Hall",
     "city": "New York, NY",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1980-10-30": {
     "id": "gd1980-10-30.139599.sbd.bershaw.flac16",
@@ -6135,7 +6177,8 @@
     "id": "gd1981-07-02.134520.s1.aud.bernstein.flac1644",
     "venue": "The Summit",
     "city": "Houston, TX",
-    "type": "aud"
+    "type": "aud",
+    "partial": "set1"
   },
   "1981-07-04": {
     "id": "gd1981-07-04.175190.sbd.miller.phase.repair.flac1644",
@@ -6183,7 +6226,8 @@
     "id": "gd1981-07-14.135808.set1.nak100.schley.flac2448",
     "venue": "McNichols Sports Arena",
     "city": "Denver, CO",
-    "type": "aud"
+    "type": "aud",
+    "partial": "set1"
   },
   "1981-08-06": {
     "id": "gd1981-08-06.148439.sbd.clugston.remaster32019.flac16",
@@ -6195,7 +6239,8 @@
     "id": "gd1981-08-12.139592.PartialShow.SaltPalace.UT.sbd.msc.happyjack.Flac24",
     "venue": "Salt Palace",
     "city": "Salt Lake City, UT",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1981-08-14": {
     "id": "gd1981-08-14.134817.set2.aud.schley.flac1644",
@@ -6381,7 +6426,8 @@
     "id": "gd1981-12-02.145543.s1.sbd.miller.flac2496",
     "venue": "Assembly Hall, University Of Illinois",
     "city": "Champaign, IL",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1981-12-03": {
     "id": "gd1981-12-03.sbd.miller.108335.flac16",
@@ -6483,7 +6529,8 @@
     "id": "gd1982-02-20.137590.s1.nak300.schley.flac2448",
     "venue": "Golden Hall, Community Concourse",
     "city": "San Diego, CA",
-    "type": "aud"
+    "type": "aud",
+    "partial": "set1"
   },
   "1982-02-21": {
     "id": "gd1982-02-21.148007.sbd.miller.clugston.flac16",
@@ -6639,7 +6686,8 @@
     "id": "gd1982-07-29.167264.2nd.set.partial.sbd.clugston.flac16",
     "venue": "Red Rocks Amphitheatre",
     "city": "Morrison, CO",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1982-07-31": {
     "id": "gd1982-07-31.112575.sbd.LATVALA.GEMS.flac16",
@@ -6699,7 +6747,8 @@
     "id": "gd1982-08-29.140735.set1.pset2.sbd.lamarre.berger.flac2496",
     "venue": "Seattle Center Coliseum",
     "city": "Seattle, WA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1982-09-05": {
     "id": "gd1982-09-05.142714.sbd.healy.streeter.dalton.miller.clugston.flac1648",
@@ -6729,7 +6778,8 @@
     "id": "gd1982-09-14.155665.sbd.set1p.set2.patched.miller.flac1644",
     "venue": "University Hall, University Of Virginia",
     "city": "Charlottesville, VA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1982-09-15": {
     "id": "gd1982-09-15.sbd-aud.cribbs.8550.sbefail.shnf",
@@ -6945,7 +6995,8 @@
     "id": "gd1983-04-19.123036.set1.sbd.moore-berger.flac16",
     "venue": "Alfond Arena, U of Maine",
     "city": "Orono, ME",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1983-04-20": {
     "id": "gd83-04-20.sbd.miller.27860.sbeok.flacf",
@@ -7125,7 +7176,8 @@
     "id": "gd1983-09-08.set1-aud.set2-sbd.84856.flac",
     "venue": "Red Rocks Amphitheatre",
     "city": "Morrison, CO",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1983-09-10": {
     "id": "gd1983-09-10.139299.sbd.eaton.miller.flac1648",
@@ -7155,7 +7207,8 @@
     "id": "gd83-09-24.set1-sbd.wiley.9201.sbeok.shnf",
     "venue": "Santa Cruz County Fairgrounds",
     "city": "Watsonville, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1983-10-08": {
     "id": "gd1983-10-08.111147.beyer-senn-daweez.d5scott.flac16",
@@ -8079,7 +8132,8 @@
     "id": "gd1985-11-21.137508.set1-sbd.pcm.miller.flac16",
     "venue": "Henry J. Kaiser Convention Center",
     "city": "Oakland, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1985-11-22": {
     "id": "gd1985-11-22.sbd.miller.77404.sbeok.flac16",
@@ -8133,7 +8187,8 @@
     "id": "gd1986-03-19.s1.sbd.barletta-sirmick.109838.sbeok.flac16",
     "venue": "Hampton Coliseum",
     "city": "Hampton, VA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1986-03-20": {
     "id": "gd1986-03-20.sbd.fishman.107321.flac16",
@@ -8151,7 +8206,8 @@
     "id": "gd1986-03-23.133940.sbd.set2partial.andrewf.flac1644",
     "venue": "The Spectrum",
     "city": "Philadelphia, PA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1986-03-24": {
     "id": "gd1986-03-24.sbd.goetz.21920.sbeok.shnf",
@@ -8277,7 +8333,8 @@
     "id": "gd1986-06-21.sbd-set1-pcm.miller.81011.flac16",
     "venue": "Greek Theatre - University of California",
     "city": "Berkeley, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1986-06-22": {
     "id": "gd1986-06-22.sbd.walker-scotton.miller.81646.flac16",
@@ -8289,7 +8346,8 @@
     "id": "gd1986-06-26.139268.partial.sbd.miller.flac24",
     "venue": "Hubert H. Humphrey Metrodome",
     "city": "Minneapolis, MN",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1986-06-28": {
     "id": "gd1986-06-28.139269.sbd.miller.flac24",
@@ -8727,7 +8785,8 @@
     "id": "gd1987-08-18.140125.sbd.s1.miller.flac2496",
     "venue": "Compton Terrace Amphitheatre",
     "city": "Tempe, AZ",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1987-08-20": {
     "id": "gd1987-08-20.140126.sbd.miller.flac2496",
@@ -9717,7 +9776,8 @@
     "id": "gd1989-09-27.145209.s1.aud.flac1644",
     "venue": "Warfield Theater",
     "city": "San Francisco, CA",
-    "type": "aud"
+    "type": "aud",
+    "partial": "set1"
   },
   "1989-09-29": {
     "id": "gd1989-09-29.151409.sbd.miller.flac2496",
@@ -9987,7 +10047,8 @@
     "id": "gd1990-05-05.137021.set1.sbd.miller.flac24",
     "venue": "Cal State Dominguez Hills",
     "city": "Carson, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1990-05-06": {
     "id": "gd1990-05-06.141263.sbd.miller.flac2496",
@@ -10449,7 +10510,8 @@
     "id": "gd1991-04-07.137080.set1.sbd.miller.flac24",
     "venue": "Orlando Arena",
     "city": "Orlando, FL",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1991-04-08": {
     "id": "gd1991-04-08.137100.sbd.miller.flac24",
@@ -10509,7 +10571,8 @@
     "id": "gd1991-05-12.137353.set1.sbd.miller.flac1644",
     "venue": "Shoreline Amphitheatre",
     "city": "Mountain View, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1991-06-01": {
     "id": "gd1991-06-01.140453.sbd.miller.flac2496",
@@ -11103,7 +11166,8 @@
     "id": "gd1992-12-03.140149.s1.sbd.miller.flac2496",
     "venue": "McNichols Sports Arena",
     "city": "Denver, CO",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1992-12-05": {
     "id": "gd1992-12-05.140150.s2.sbd.miller.flac2496",
@@ -11661,7 +11725,8 @@
     "id": "gd1994-02-26.156421.s1.sbd.miller.flac2448",
     "venue": "Oakland-Alameda County Coliseum",
     "city": "Oakland, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1994-02-27": {
     "id": "gd1994-02-27.sbd.miller.32577.sbeok.flac16",
@@ -11721,19 +11786,22 @@
     "id": "gd1994-03-23.124020.sbd.partial.nawrocki.flacf",
     "venue": "Nassau Coliseum",
     "city": "Uniondale, NY",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1994-03-24": {
     "id": "gd1994-03-24.140154.OTS.s1.Schoeps.Gastwirt.Miller.Noel.t-flac1648",
     "venue": "Nassau Coliseum",
     "city": "Uniondale, NY",
-    "type": "aud"
+    "type": "aud",
+    "partial": "set1"
   },
   "1994-03-25": {
     "id": "gd1994-03-25.140155.OTS.s1.Schoeps.Gastwirt.Miller.Noel.t-flac1648",
     "venue": "Nassau Coliseum",
     "city": "Uniondale, NY",
-    "type": "aud"
+    "type": "aud",
+    "partial": "set1"
   },
   "1994-03-27": {
     "id": "gd94-03-27.sbd.miller.20926.sbeok.shnf",
@@ -12141,7 +12209,8 @@
     "id": "gd1994-12-16.157721.sbd.set1.beckwith.miller.flac2448",
     "venue": "Sports Arena",
     "city": "Los Angeles, CA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "set1"
   },
   "1994-12-18": {
     "id": "gd1994-12-18.149203.mtx.tobin.flac16",
@@ -12315,7 +12384,8 @@
     "id": "gd1995-05-24.partial.sbd.larson.35181.sbeok.flac16",
     "venue": "Memorial Stadium",
     "city": "Seattle, WA",
-    "type": "sbd"
+    "type": "sbd",
+    "partial": "partial"
   },
   "1995-05-25": {
     "id": "gd1995-05-25.135613.mk41.miller.flac16",

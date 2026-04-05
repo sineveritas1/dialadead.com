@@ -717,7 +717,7 @@ function renderShows(list){
       <div class="show-venue">${s.venue||'—'}</div>
       <div class="show-city">${s.city||''}</div>
       <div class="show-src ${s.type||'aud'}">${(s.type||'aud')==='sbd'?'▸ SBD':'▸ AUD'}</div>
-      ${s.partial?`<div class="show-partial">${s.partial==='set1'?'S1 ONLY':'PARTIAL'}</div>`:''}
+      ${s.partial?`<div class="show-partial">${s.partial==='set1'?'S1 ONLY':s.partial==='set2'?'S2 ONLY':'PARTIAL'}</div>`:''}
     </div>`;
   }).join('');
 }
@@ -760,6 +760,15 @@ async function engage(){
   setTimeout(()=>document.getElementById('ebtn').style.animation='',450);
   document.getElementById('player-panel').classList.remove('visible');
   setStatus('',`<span class="loading">⟳</span> SCANNING FOR ${ms}/${ds}/${y}...`);
+  // Returns true only if identifier is a single-set or explicitly partial recording
+  // Identifiers with BOTH set1+set2 markers are complete shows — don't filter those
+  function isKnownPartial(id){
+    id=id.toLowerCase();
+    const s1=/pset1|[._-]set1[._-]|[._-]set1$|set1p|[._-]s1[._-]|[._-]s1$/.test(id);
+    const s2=/pset2|[._-]set2[._-]|[._-]set2$|[._-]s2[._-]|[._-]s2$/.test(id);
+    if(s1&&s2) return false; // has both — it's a full show
+    return s1||s2||/\bpartial\b/.test(id);
+  }
   if(SHOW_MAP[key]){
     const s=SHOW_MAP[key];
     if(s.partial){
@@ -770,7 +779,6 @@ async function engage(){
         const r=await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}&fl[]=identifier&rows=20&output=json`);
         const data=await r.json();
         const docs=data.response?.docs||[];
-        const isKnownPartial=id=>/partial|set1|pset1|[._-]s1[._-]|set1p|\.s1\b/i.test(id);
         const complete=docs.filter(d=>!isKnownPartial(d.identifier)&&d.identifier!==s.id);
         if(complete.length){
           const best=complete.sort((a,b)=>{
@@ -794,7 +802,6 @@ async function engage(){
     const data=await r.json();
     const docs=data.response?.docs||[];
     if(!docs.length){setStatus('err',`☠ NO SHOW: ${ms}/${ds}/${y}<br><span style="font-size:9px">THE DEAD DID NOT PLAY THIS NIGHT</span>`);return;}
-    const isKnownPartial=id=>/partial|set1|pset1|[._-]s1[._-]|set1p|\.s1\b/i.test(id);
     const complete=docs.filter(d=>!isKnownPartial(d.identifier));
     const pool=complete.length?complete:docs;
     const best=pool.sort((a,b)=>{
@@ -832,7 +839,7 @@ async function loadShow(identifier,m,d,y,venue,city,type,isPartial=false){
     document.getElementById('track-count').textContent=`${mp3s.length} TRACKS`;
     const pw=document.getElementById('partial-warn');
     if(isPartial){
-      pw.textContent=isPartial==='set1'?'⚠ SET 1 ONLY — COMPLETE SHOW NOT ON ARCHIVE':'⚠ PARTIAL RECORDING — INCOMPLETE TAPE';
+      pw.textContent=isPartial==='set1'?'⚠ SET 1 ONLY — COMPLETE SHOW NOT ON ARCHIVE':isPartial==='set2'?'⚠ SET 2 ONLY — COMPLETE SHOW NOT ON ARCHIVE':'⚠ PARTIAL RECORDING — INCOMPLETE TAPE';
       pw.style.display='block';
     }else{pw.style.display='none';}
     tracks=mp3s.map(f=>({name:cleanName(f.title||f.name),url:`https://archive.org/download/${identifier}/${encodeURIComponent(f.name)}`,duration:f.length||0}));

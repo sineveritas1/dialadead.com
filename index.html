@@ -710,7 +710,11 @@ async function engage(){
     const data=await r.json();
     const docs=data.response?.docs||[];
     if(!docs.length){setStatus('err',`☠ NO SHOW: ${ms}/${ds}/${y}<br><span style="font-size:9px">THE DEAD DID NOT PLAY THIS NIGHT</span>`);return;}
-    const best=docs.sort((a,b)=>(/sbd|matrix/i.test(b.identifier)?1:0)-(/sbd|matrix/i.test(a.identifier)?1:0))[0];
+    const best=docs.sort((a,b)=>{
+      // Prefer sbd/matrix; penalize disc-split items (.d1. .d2.) that only have half a show
+      const score=id=>(/sbd|matrix/i.test(id)?2:0)-(/[._]d[12][._]/i.test(id)?1:0);
+      return score(b.identifier)-score(a.identifier);
+    })[0];
     await loadShow(best.identifier,m,d,y,'','',/sbd|matrix/i.test(best.identifier)?'sbd':'aud');
   }catch(e){setStatus('err',`☠ ARCHIVE OFFLINE`);}
 }
@@ -720,7 +724,16 @@ async function loadShow(identifier,m,d,y,venue,city,type){
   try{
     const r=await fetch(`https://archive.org/metadata/${identifier}`);
     const meta=await r.json();
-    const mp3s=(meta.files||[]).filter(f=>f.name.toLowerCase().endsWith('.mp3')).sort((a,b)=>a.name.localeCompare(b.name));
+    // Deduplicate: Archive.org generates multiple MP3 variants per track (_vbr, _64kb, etc.)
+    // Group by original source file and keep the cleanest MP3 per track
+    const allMp3s=(meta.files||[]).filter(f=>f.name.toLowerCase().endsWith('.mp3'));
+    const seen=new Map();
+    for(const f of allMp3s){
+      const key=f.original||f.name;
+      const cur=seen.get(key);
+      if(!cur||/_\d+kb\.mp3$|_vbr\.mp3$/i.test(cur.name)){seen.set(key,f);}
+    }
+    const mp3s=[...seen.values()].sort((a,b)=>a.name.localeCompare(b.name));
     if(!mp3s.length){setStatus('err','☠ NO AUDIO AVAILABLE');return;}
     const v=venue||meta.metadata?.venue||'';
     const c=city||meta.metadata?.coverage||'';

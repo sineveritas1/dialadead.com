@@ -1,0 +1,17 @@
+{
+  "name": "DIAL·A·DEAD",
+  "short_name": "DIAL·A·DEAD",
+  "description": "Stream any Grateful Dead show from Archive.org. Enter a date. Stream the show.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#39FF14",
+  "icons": [
+    {
+      "src": "https://res.cloudinary.com/dmbeoutyi/image/upload/v1774666557/Untitled_design_16_v575qu.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

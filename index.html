@@ -3,10 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>DIAL-A-DEAD</title>
+<title>DIAL·A·DEAD — Stream Any Grateful Dead Show Free</title>
+<meta name="description" content="Stream any Grateful Dead show from 1965–1995. Enter a date and instantly dial in soundboards and audience recordings from the Archive.org collection. Free. No account needed.">
+<link rel="canonical" href="https://gratefuldead.pages.dev/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://gratefuldead.pages.dev/">
+<meta property="og:title" content="DIAL·A·DEAD — Stream Any Grateful Dead Show Free">
+<meta property="og:description" content="Enter a date. Stream the show. Every Grateful Dead recording from Archive.org, free. 1965–1995.">
+<meta property="og:image" content="https://res.cloudinary.com/dmbeoutyi/image/upload/v1774666557/Untitled_design_16_v575qu.png">
+<meta property="og:site_name" content="DIAL·A·DEAD">
+
+<!-- Twitter/X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DIAL·A·DEAD — Stream Any Grateful Dead Show Free">
+<meta name="twitter:description" content="Enter a date. Stream the show. Every Grateful Dead recording from Archive.org, free.">
+<meta name="twitter:image" content="https://res.cloudinary.com/dmbeoutyi/image/upload/v1774666557/Untitled_design_16_v575qu.png">
+
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#39FF14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DIAL·A·DEAD">
+<link rel="apple-touch-icon" href="https://res.cloudinary.com/dmbeoutyi/image/upload/v1774666557/Untitled_design_16_v575qu.png">
+
+<!-- Schema.org -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"DIAL·A·DEAD","url":"https://gratefuldead.pages.dev/","description":"Stream any Grateful Dead show from 1965–1995. Soundboards and audience recordings from Archive.org, free.","applicationCategory":"MusicApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Organization","name":"NeonDeadhead","url":"https://neondeadhead.com"}}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"MusicGroup","name":"Grateful Dead","sameAs":["https://archive.org/details/GratefulDead","https://en.wikipedia.org/wiki/Grateful_Dead"]}
+</script>
 <link rel="icon" type="image/png" href="https://res.cloudinary.com/dmbeoutyi/image/upload/v1774666557/Untitled_design_16_v575qu.png">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 :root{--pink:#FF1493;--green:#39FF14;--blue:#00BFFF;}
@@ -1193,9 +1225,17 @@ function keepDlShow(){
   pendingNav=null;
   hideDlWarn();
 }
+function loadJSZip(){
+  return window.JSZip?Promise.resolve():new Promise((res,rej)=>{
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    s.onload=res;s.onerror=rej;document.head.appendChild(s);
+  });
+}
 async function dlShow(btn){
   if(dlShowActive) return;
   if(!tracks.length) return;
+  await loadJSZip();
   dlShowAbort=new AbortController();
   dlShowActive=true;
   const orig=btn.innerHTML;

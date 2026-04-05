@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>Dial-A-Dead</ShortName>
+  <Description>Stream any Grateful Dead show — enter a date to dial in</Description>
+  <Tags>Grateful Dead live music streaming</Tags>
+  <Image width="500" height="500" type="image/png">https://dialadead.com/Skull.png</Image>
+  <Url type="text/html" template="https://dialadead.com/?date={searchTerms}"/>
+  <InputEncoding>UTF-8</InputEncoding>
+</OpenSearchDescription>

@@ -1,0 +1,18 @@
+{
+  "name": "Dial-A-Dead",
+  "short_name": "Dial-A-Dead",
+  "description": "Stream every Grateful Dead live show from 1965–1995. Soundboards, audience tapes, and complete sets free from the Internet Archive.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#FF1493",
+  "icons": [
+    {
+      "src": "/Skull.png",
+      "sizes": "500x500",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["music", "entertainment"]
+}

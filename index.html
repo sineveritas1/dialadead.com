@@ -930,9 +930,10 @@ audio.addEventListener('timeupdate',()=>{
   document.getElementById('time-display').textContent=`${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
 });
 function seekTo(e){
+  if(!audio.duration) return;
   const w=document.getElementById('progress-fill').parentElement;
-  const pct=(e.clientX-w.getBoundingClientRect().left)/w.offsetWidth;
-  if(audio.duration) audio.currentTime=pct*audio.duration;
+  const pct=Math.min(Math.max((e.clientX-w.getBoundingClientRect().left)/w.offsetWidth,0),0.999);
+  audio.currentTime=pct*audio.duration;
 }
 function formatTime(s){
   if(!s||isNaN(s)) return '—';

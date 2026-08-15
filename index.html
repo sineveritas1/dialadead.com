@@ -1443,9 +1443,32 @@ function updateActive(){
     el.classList.toggle('active',i===currentTrack);
     el.querySelector('.track-icon').textContent=i===currentTrack?'▶':'';
   });
-  const a=document.getElementById(`trk-${currentTrack}`);
-  if(a) a.scrollIntoView({block:'nearest',behavior:'smooth'});
+  scrollActiveIntoView();
 }
+// Only move the viewport while the page is actually on screen. Tapping next/prev
+// in the phone's notification shade fires this via the Media Session handlers; a
+// page-initiated scroll while hidden makes Android surface the browser and snap
+// the shade shut, which reads as "it bounced me out of the panel". Deferred to
+// the next visibility change instead, so the list is still in sync on return.
+let pendingScroll=false;
+function scrollActiveIntoView(smooth){
+  if(document.visibilityState!=='visible'){pendingScroll=true;return;}
+  const a=document.getElementById(`trk-${currentTrack}`);
+  const list=document.getElementById('tracklist');
+  if(!a||!list) return;
+  // Scroll the tracklist itself rather than calling scrollIntoView, which walks
+  // up and can move the document scroll position too. Keeping it inside the
+  // container means playback never moves the page under the user.
+  const top=a.offsetTop-list.clientHeight/2+a.offsetHeight/2;
+  const max=list.scrollHeight-list.clientHeight;
+  list.scrollTo({top:Math.max(0,Math.min(top,max)),behavior:smooth===false?'auto':'smooth'});
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'&&pendingScroll){
+    pendingScroll=false;
+    scrollActiveIntoView(false);
+  }
+});
 
 // ── Media Session (lockscreen / notification controls + background playback) ───
 // This is what keeps audio alive when the screen is off / app is backgrounded,

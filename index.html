@@ -7,11 +7,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>DIAL·A·DEAD — Stream Any Grateful Dead Show Free</title>
 <meta name="description" content="Stream any Grateful Dead show from 1965–1995. Enter a date and instantly dial in soundboards and audience recordings from the Archive.org collection. Free. No account needed.">
-<link rel="canonical" href="https://gratefuldead.pages.dev/">
+<link rel="canonical" href="https://dialadead.com/">
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://gratefuldead.pages.dev/">
+<meta property="og:url" content="https://dialadead.com/">
 <meta property="og:title" content="DIAL·A·DEAD — Stream Any Grateful Dead Show Free">
 <meta property="og:description" content="Enter a date. Stream the show. Every Grateful Dead recording from Archive.org, free. 1965–1995.">
 <meta property="og:image" content="https://res.cloudinary.com/dmbeoutyi/image/upload/v1774666557/Untitled_design_16_v575qu.png">
@@ -34,7 +34,7 @@
 
 <!-- Schema.org -->
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebApplication","name":"DIAL·A·DEAD","url":"https://gratefuldead.pages.dev/","description":"Stream any Grateful Dead show from 1965–1995. Soundboards and audience recordings from Archive.org, free.","applicationCategory":"MusicApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Organization","name":"NeonDeadhead","url":"https://neondeadhead.com"}}
+{"@context":"https://schema.org","@type":"WebApplication","name":"DIAL·A·DEAD","url":"https://dialadead.com/","description":"Stream any Grateful Dead show from 1965–1995. Soundboards and audience recordings from Archive.org, free.","applicationCategory":"MusicApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Organization","name":"NeonDeadhead","url":"https://neondeadhead.com"}}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"MusicGroup","name":"Grateful Dead","sameAs":["https://archive.org/details/GratefulDead","https://en.wikipedia.org/wiki/Grateful_Dead"]}
@@ -793,6 +793,35 @@ html.purist .setup-box{background:#fff8f8;border-color:#CC000033;}
 html.purist .setup-box h3{color:#CC0000;}
 html.purist .setup-box code{background:#f5f5f5;border-color:#dddddd;color:#003087;}
 html.purist .setup-box p{color:#555555;}
+
+/* ── RECORDING / SOURCE SELECTOR ── */
+.source-row{
+  display:flex;align-items:center;gap:8px;
+  margin:0 0 12px;
+}
+.source-label{
+  font-size:9px;letter-spacing:2px;color:#39FF14cc;
+  text-shadow:0 0 8px #39FF1455;flex-shrink:0;
+}
+.source-select{
+  flex:1;min-width:0;
+  background:#000;border:1.5px solid #39FF1444;border-radius:6px;
+  color:#39FF14;font-family:'Share Tech Mono',monospace;
+  font-size:11px;letter-spacing:1px;
+  padding:8px 28px 8px 10px;cursor:pointer;outline:none;
+  -webkit-appearance:none;appearance:none;
+  text-overflow:ellipsis;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2339FF14'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;
+  transition:border-color .2s,box-shadow .2s;
+}
+.source-select:focus{border-color:#39FF1488;box-shadow:0 0 10px #39FF1433;}
+.source-select:disabled{opacity:.55;cursor:default;}
+.source-select option{background:#0a0a0a;color:#eee;}
+html.purist .source-label{color:#003087;text-shadow:none;}
+html.purist .source-select{background:#fff;border-color:#00308744;color:#003087;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23003087'/%3E%3C/svg%3E");}
+html.purist .source-select option{background:#fff;color:#003087;}
 </style>
 </head>
 <body>
@@ -875,6 +904,10 @@ html.purist .setup-box p{color:#555555;}
     </div>
     <div class="show-venue-big" id="show-venue-big"></div>
     <div class="show-meta" id="show-meta"></div>
+    <div class="source-row" id="source-row" style="display:none;">
+      <label class="source-label" for="source-select">RECORDING</label>
+      <select class="source-select" id="source-select" onchange="switchSource(this.value)"></select>
+    </div>
     <div class="share-row" style="justify-content:space-between;">
       <button class="btn-fave" id="btn-fave" onclick="toggleFave()">♡ SAVE SHOW</button>
       <button class="btn-share" onclick="shareShow()">⤴ SHARE THIS SHOW</button>
@@ -978,12 +1011,11 @@ async function init(){
     document.getElementById('archive-badge').textContent='NO DATABASE';
     document.getElementById('show-grid').innerHTML=`
       <div class="setup-box">
-        <h3>☠ DATABASE NOT FOUND</h3>
-        <p style="color:#FF149388;margin-bottom:8px">Run the generator to build shows.json.</p>
-        <code>cd C:\\GratefulDead</code>
-        <code>python generate_shows.py</code>
-        <p>ENGAGE still works — searches Archive.org live.<br>
-        RANDOM + show list need shows.json.</p>
+        <h3>☠ ARCHIVE INDEX OFFLINE</h3>
+        <p style="color:#FF149388;margin-bottom:8px">Couldn't load the show index (shows.json).</p>
+        <p>ENGAGE still works — it searches Archive.org live.<br>
+        RANDOM + the browsable show list need the index.<br>
+        Check your connection and reload.</p>
       </div>`;
   }
 }
@@ -1094,7 +1126,7 @@ async function engage(){
 }
 
 // ── Load show ─────────────────────────────────────────────────────────────────
-async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen){
+async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen,skipSources=false){
   try{
     const r=await fetchWithTimeout(`https://archive.org/metadata/${identifier}`,15000);
     if(gen!==loadGen) return;
@@ -1131,7 +1163,70 @@ async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen){
     document.getElementById('player-panel').classList.add('visible');
     document.getElementById('status-panel').style.display='none';
     playTrack(0);
+    if(!skipSources) loadSources(y,m,d,identifier,gen);
   }catch(e){setStatus('err','☠ FAILED TO LOAD');}
+}
+
+// ── Recording sources (all Archive.org recordings for a given date) ────────────
+// The show index (shows.json) stores ONE recommended recording per date. Here we
+// fetch EVERY recording Archive.org has for that date so the listener can switch
+// between soundboards, matrixes and audience tapes from a dropdown.
+let sourcesByDate={};
+function sourceType(id){return /sbd|matrix|mtx|soundboard/i.test(id)?'sbd':'aud';}
+function sourceLabel(id,doc){
+  const kind=/matrix|mtx/i.test(id)?'MTX':(/sbd|soundboard/i.test(id)?'SBD':'AUD');
+  const skip=new Set(['gd','sbd','aud','fm','dsbd','mtx','matrix','soundboard','flac','flac16','flac1648','flac24','shnf','shn','sbeok','shntool','md5','vbr','set1','set2','set3','remaster','remastered']);
+  const taper=(id.split(/[.\-_]/).find(p=>/^[a-z]{3,}$/i.test(p)&&!skip.has(p.toLowerCase()))||'').toLowerCase();
+  let label=kind;
+  if(taper) label+=' · '+taper;
+  const rating=doc&&doc.avg_rating?Number(doc.avg_rating):0;
+  if(rating) label+=' · ★'+rating.toFixed(1);
+  return label;
+}
+async function loadSources(y,m,d,selectedId,gen=loadGen){
+  const row=document.getElementById('source-row');
+  const sel=document.getElementById('source-select');
+  const key=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  if(sourcesByDate[key]){renderSources(sourcesByDate[key],selectedId);return;}
+  row.style.display='flex';sel.disabled=true;
+  sel.innerHTML='<option>⟳ FINDING RECORDINGS…</option>';
+  try{
+    const q=`collection:(GratefulDead) AND date:${key}`;
+    const url=`https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}&fl[]=identifier&fl[]=avg_rating&fl[]=downloads&rows=150&output=json`;
+    const r=await fetchWithTimeout(url,15000);
+    const data=await r.json();
+    if(gen!==loadGen) return;
+    let docs=(data.response?.docs||[]).filter(x=>x&&x.identifier);
+    if(selectedId&&!docs.some(x=>x.identifier===selectedId)) docs.unshift({identifier:selectedId});
+    docs.sort((a,b)=>{
+      const sa=sourceType(a.identifier)==='sbd'?1:0, sb=sourceType(b.identifier)==='sbd'?1:0;
+      if(sa!==sb) return sb-sa;
+      return (Number(b.downloads)||0)-(Number(a.downloads)||0);
+    });
+    const list=docs.map(x=>({identifier:x.identifier,label:sourceLabel(x.identifier,x),type:sourceType(x.identifier)}));
+    sourcesByDate[key]=list;
+    renderSources(list,selectedId);
+  }catch(e){
+    if(gen!==loadGen) return;
+    row.style.display='none';
+  }
+}
+function renderSources(list,selectedId){
+  const row=document.getElementById('source-row');
+  const sel=document.getElementById('source-select');
+  if(!list||list.length<=1){row.style.display='none';return;}
+  row.style.display='flex';sel.disabled=false;
+  sel.innerHTML=list.map((s,i)=>
+    `<option value="${escHtml(s.identifier)}"${s.identifier===selectedId?' selected':''}>${escHtml(`${i+1}/${list.length}  ${s.label}`)}</option>`
+  ).join('');
+}
+function switchSource(identifier){
+  if(!identifier||!currentShow||identifier===currentShow.identifier) return;
+  if(guardShowChange(()=>switchSource(identifier))) return;
+  const[y,m,d]=currentShow.date.split('-').map(Number);
+  const gen=++loadGen;
+  setStatus('',`<span class="loading">⟳</span> SWITCHING RECORDING…`);
+  loadShow(identifier,m,d,y,currentShow.venue,currentShow.city,sourceType(identifier),gen,true);
 }
 
 // ── Track name cleaner ────────────────────────────────────────────────────────
@@ -1170,7 +1265,49 @@ function cleanName(raw){
   s=s.replace(/^[^a-zA-Z0-9(]+|[^a-zA-Z0-9'")]+$/g,'').trim();
   // Title-case if all lowercase
   if(s&&s===s.toLowerCase()) s=s.replace(/\b\w/g,c=>c.toUpperCase());
+  // Normalize to canonical Grateful Dead song titles when we recognize the track
+  s=canonSong(s);
   return s||'—';
+}
+// ── Canonical song-title normalizer ────────────────────────────────────────────
+// Maps the messy filename spellings Archive.org taping crews use to the proper
+// song title. Matches whole cleaned track names (single songs, not medleys).
+const SONG_CANON=(()=>{
+  const norm=x=>x.toLowerCase().replace(/[^a-z0-9]/g,'');
+  const names=["Truckin'","Sugar Magnolia","Scarlet Begonias","Fire on the Mountain",
+    "Casey Jones","Ripple","Friend of the Devil","Uncle John's Band","Playing in the Band",
+    "Dark Star","St. Stephen","The Other One","Not Fade Away","Good Lovin'","Bertha",
+    "Jack Straw","Tennessee Jed","Ramble On Rose","Brown-Eyed Women","Cumberland Blues",
+    "China Cat Sunflower","I Know You Rider","Eyes of the World","Estimated Prophet",
+    "Terrapin Station","He's Gone","Wharf Rat","Deal","Loser","Candyman","Sugaree",
+    "Mississippi Half-Step","Cassidy","Row Jimmy","Franklin's Tower","The Music Never Stopped",
+    "Shakedown Street","Touch of Grey","Throwing Stones","Morning Dew","Around and Around",
+    "Johnny B. Goode","U.S. Blues","One More Saturday Night","Turn On Your Love Light",
+    "Goin' Down the Road Feeling Bad","El Paso","Me and My Uncle","Big River","Mama Tried",
+    "Deep Elem Blues","Cold Rain and Snow","Bird Song","Box of Rain","Attics of My Life",
+    "Black Peter","Standing on the Moon","Stella Blue","Comes a Time","Help on the Way",
+    "Slipknot!","Weather Report Suite","China Doll","Brokedown Palace","Might as Well",
+    "Feel Like a Stranger","Hell in a Bucket","West L.A. Fadeaway","Althea","Alabama Getaway",
+    "Samson and Delilah","New Speedway Boogie","Dire Wolf","Cosmic Charlie","The Wheel",
+    "Dupree's Diamond Blues","Jack-A-Roe","Peggy-O","Sing Me Back Home","Tomorrow Is Forever",
+    "Drums","Space","Birdsong","Playing in the Band Reprise"];
+  const map={};
+  names.forEach(n=>map[norm(n)]=n);
+  Object.assign(map,{
+    gdtrfb:"Goin' Down the Road Feeling Bad",
+    goingdowntheroadfeelingbad:"Goin' Down the Road Feeling Bad",
+    nfa:"Not Fade Away", ujb:"Uncle John's Band", fotm:"Fire on the Mountain",
+    ststephen:"St. Stephen", saintstephen:"St. Stephen", usblues:"U.S. Blues",
+    playin:"Playing in the Band", playinintheband:"Playing in the Band",
+    lovelight:"Turn On Your Love Light", loveligh:"Turn On Your Love Light",
+    goodloving:"Good Lovin'", theotherone:"The Other One", wheel:"The Wheel",
+    jbgoode:"Johnny B. Goode", chinacat:"China Cat Sunflower", ikyr:"I Know You Rider"
+  });
+  return map;
+})();
+function canonSong(s){
+  const key=String(s).toLowerCase().replace(/[^a-z0-9]/g,'');
+  return SONG_CANON[key]||s;
 }
 
 // ── Build tracklist ───────────────────────────────────────────────────────────
@@ -1305,19 +1442,77 @@ function updateActive(){
   if(a) a.scrollIntoView({block:'nearest',behavior:'smooth'});
 }
 
+// ── Media Session (lockscreen / notification controls + background playback) ───
+// This is what keeps audio alive when the screen is off / app is backgrounded,
+// and what shows the CURRENT TRACK TITLE in the notification instead of the app name.
+const MS_ARTWORK='https://res.cloudinary.com/dmbeoutyi/image/upload/w_512,h_512,c_fill/v1774666557/Untitled_design_16_v575qu.png';
+let mediaSessionReady=false;
+function setupMediaSession(){
+  if(mediaSessionReady||!('mediaSession' in navigator)) return;
+  mediaSessionReady=true;
+  const ms=navigator.mediaSession;
+  const set=(a,fn)=>{try{ms.setActionHandler(a,fn);}catch(e){}};
+  set('play',()=>{audio.play().catch(()=>{});});
+  set('pause',()=>{audio.pause();});
+  set('previoustrack',()=>prevTrack());
+  set('nexttrack',()=>nextTrack());
+  set('seekbackward',d=>{audio.currentTime=Math.max(0,audio.currentTime-(d&&d.seekOffset||10));});
+  set('seekforward',d=>{audio.currentTime=Math.min(audio.duration||1e9,audio.currentTime+(d&&d.seekOffset||10));});
+  set('seekto',d=>{if(!d)return;if(d.fastSeek&&'fastSeek'in audio){audio.fastSeek(d.seekTime);}else{audio.currentTime=d.seekTime;}updatePositionState();});
+  set('stop',()=>{audio.pause();});
+}
+function updateMediaSession(){
+  if(!('mediaSession' in navigator)) return;
+  setupMediaSession();
+  const t=tracks[currentTrack];
+  if(!t) return;
+  let album='Grateful Dead';
+  if(currentShow&&currentShow.date){
+    const[cy,cm,cd]=currentShow.date.split('-').map(Number);
+    album=`${MONTHS[cm-1]} ${cd}, ${cy}`+(currentShow.venue?` · ${currentShow.venue}`:'');
+  }
+  try{
+    navigator.mediaSession.metadata=new MediaMetadata({
+      title:t.name||`Track ${currentTrack+1}`,
+      artist:'Grateful Dead',
+      album,
+      artwork:[96,128,192,256,384,512].map(sz=>({src:MS_ARTWORK,sizes:`${sz}x${sz}`,type:'image/png'}))
+    });
+  }catch(e){}
+  updatePositionState();
+}
+function updatePositionState(){
+  const ms=navigator.mediaSession;
+  if(!ms||!('setPositionState' in ms)) return;
+  if(!audio.duration||!isFinite(audio.duration)) return;
+  try{ms.setPositionState({duration:audio.duration,playbackRate:audio.playbackRate||1,position:Math.min(audio.currentTime,audio.duration)});}catch(e){}
+}
+audio.preload='auto';
+audio.setAttribute('playsinline','');
+audio.addEventListener('play',()=>{
+  if('mediaSession' in navigator) navigator.mediaSession.playbackState='playing';
+  document.getElementById('play-pause-btn').classList.remove('paused');
+});
+audio.addEventListener('pause',()=>{
+  if('mediaSession' in navigator) navigator.mediaSession.playbackState='paused';
+});
+audio.addEventListener('loadedmetadata',updatePositionState);
+
 // ── Playback ──────────────────────────────────────────────────────────────────
 let playGen=0;
 function playTrack(i){
   if(!tracks.length||i<0||i>=tracks.length) return;
   const gen=++playGen;
   currentTrack=i;
-  audio.pause();
-  audio.src='';
+  // Reassigning src implicitly aborts the previous load. We deliberately do NOT
+  // set src='' first — that briefly drops the media session and is the classic
+  // cause of playback stalling after a track or two when backgrounded.
   audio.src=tracks[i].url;
   const p=audio.play();
   if(p) p.catch(e=>{if(gen!==playGen||e.name==='AbortError') return;});
   document.getElementById('play-pause-btn').classList.remove('paused');
   updateActive();
+  updateMediaSession();
 }
 function togglePlay(){
   if(!tracks.length) return;
@@ -1349,6 +1544,7 @@ audio.addEventListener('timeupdate',()=>{
     document.getElementById('progress-fill').style.width=pct;
     document.getElementById('progress-thumb').style.left=pct;
     document.getElementById('time-display').textContent=`${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+    updatePositionState();
   });
 });
 (function(){

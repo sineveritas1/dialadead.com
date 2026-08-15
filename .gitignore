@@ -1,0 +1,10 @@
+# archive.org scrape cache written by build_shows.py — large, regenerable
+.archive_cache.json
+
+# audit output
+audit_report_*.txt
+shows_backup_*.json
+
+# python
+__pycache__/
+*.pyc

@@ -23,6 +23,7 @@ repo root.
 | `manifest.json`  | PWA manifest (installable app, theme color, icon). |
 | `robots.txt` / `sitemap.xml` | SEO. Both point at `https://dialadead.com/`. |
 | `_redirects`     | Cloudflare Pages redirect rules (currently maps `/favicon.ico` to the Cloudinary logo). |
+| `build_shows.py`  | **Regenerates `shows.json`** from Archive.org. See below. Not part of the served site. |
 | `audit_shows.py` | Maintenance script: checks every `shows.json` entry against Archive.org for dead links / missing MP3s. `python3 audit_shows.py` to report, `--fix` to prune bad shows. Not part of the served site. |
 | `Skull.png`      | Fallback icon / social image (the live logo is served from Cloudinary). |
 | `README.md`      | Public-facing blurb. |
@@ -55,6 +56,50 @@ repo root.
 - **Extras**: favorites (localStorage, max 6), prev/next-show nav, whole-show
   ZIP download (JSZip, lazy-loaded), single-track download, and a black-and-white
   "PURIST" theme toggle.
+
+## Regenerating `shows.json` — `build_shows.py`
+
+`shows.json` is **generated, not hand-edited.** The original generator was lost;
+`build_shows.py` replaces it.
+
+```bash
+python3 build_shows.py --report-only   # describe the collection, change nothing
+python3 build_shows.py --dry-run       # show what would change
+python3 build_shows.py                 # write shows.json
+python3 build_shows.py --refresh       # force a fresh scrape (cache is 24h)
+```
+
+**How it pulls** matters. It does *not* query Archive.org date by date. It
+scrapes the whole `GratefulDead` collection once (~18.3k recordings, ~19
+cursor-paginated requests) into `.archive_cache.json` (gitignored, ~8 MB), then
+decides everything locally. Consequences:
+
+- Every recording of a night is compared, so "best" is a real ranking rather
+  than whatever one search happened to return first.
+- Venue/city can be **recovered from another recording of the same night**, which
+  is what fixed most of the old `unknown` / `Various - See info file` entries.
+- Re-running with different scoring costs **zero** requests — tune and re-run freely.
+
+**Scoring** (`score()`): lineage dominates (`sbd` 3000, `mtx` 2900, `aud` 0),
+then `log10(downloads) * 300`, then `avg_rating * 100`; partial recordings take
+a 1500 penalty so a complete audience tape beats a half-missing soundboard.
+Log-scaling downloads matters — counts span ~1e2–1e6, and a linear cap made the
+legendary 1.45M-download Cornell soundboard tie with far lesser transfers.
+
+**Two traps, both already handled — don't regress them:**
+
+1. **Lineage must be read from the `identifier`, not the free-text `source`.**
+   Some items say `Audience (was labeled as sbd)`; substring-matching that flips
+   a genuine audience tape to soundboard.
+2. **A placeholder date still carries a real-looking `date` field.** Archive.org
+   stamps `gd1966-XX-XX` / `gd1985-02-00` items with a concrete date (often the
+   1st), so trusting `date` alone pins compilations, interviews, radio spots and
+   studio rehearsals onto real concert nights. `has_bogus_date()` reads the
+   identifier's own date tokens and rejects `XX`/`00` month or day.
+
+Rehearsals/interviews/outtakes are dropped via `NON_CONCERT`. Verify changes
+with `--dry-run` before writing; the comparison block reports added/removed/
+changed dates against the current file.
 
 ## Conventions — keep it this way
 

@@ -1,0 +1,35 @@
+# Dial-A-Dead
+
+> Stream every Grateful Dead live show from the Internet Archive — free, legal, and complete.
+
+Dial-A-Dead is a web player for the entire Grateful Dead live archive. Users enter any date between 1965 and 1995 and instantly stream that night's show directly from the Internet Archive (archive.org). The site connects Deadheads worldwide through shared music discovery.
+
+## What it does
+
+- Enter any date (month/day/year) to load that show's full setlist and stream it
+- Covers every known Grateful Dead concert from 1965–1995
+- Prioritizes soundboard (SBD) recordings over audience tapes when available
+- Streams MP3 audio directly from archive.org — no accounts, no cost
+- Every recording of a given night is selectable, not just one — soundboards, matrixes and audience tapes
+- Optional download of a single track or a whole show as a ZIP
+- Includes a full show archive browser with search by year, venue, and city
+- Random show discovery, saved favourites, and previous/next show navigation
+
+## Content
+
+- 2,000+ Grateful Dead live concert dates, drawn from 18,000+ archive.org recordings
+- Soundboard recordings, audience tapes, and matrix recordings
+- Complete sets: Set 1, Set 2, encores
+- Shows span 1965–1995 across hundreds of venues in the US and abroad
+
+## Who it's for
+
+Grateful Dead fans (Deadheads), music historians, jam band enthusiasts, and anyone who wants to explore one of the greatest live music archives in history.
+
+## Technology
+
+Single-page web app, no framework or build step. All audio served from the Internet Archive's public domain collection under the Grateful Dead's taper-friendly policy.
+
+## URL
+
+https://dialadead.com

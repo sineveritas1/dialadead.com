@@ -794,6 +794,10 @@ html.purist .setup-box h3{color:#CC0000;}
 html.purist .setup-box code{background:#f5f5f5;border-color:#dddddd;color:#003087;}
 html.purist .setup-box p{color:#555555;}
 
+/* Incomplete recording marker (set1/set2/partial) — from shows.json */
+.show-partial{color:#FFA50099;letter-spacing:1px;}
+html.purist .show-partial{color:#88888899;}
+
 /* ── RECORDING / SOURCE SELECTOR ── */
 .source-row{
   display:flex;align-items:center;gap:8px;
@@ -1056,7 +1060,7 @@ function renderShows(list){
       <div class="show-date">${label}</div>
       <div class="show-venue">${escHtml(s.venue||'—')}</div>
       <div class="show-city">${escHtml(s.city||'')}</div>
-      <div class="show-src ${s.type||'aud'}">${(s.type||'aud')==='sbd'?'▸ SBD':'▸ AUD'}</div>
+      <div class="show-src ${s.type||'aud'}">${(s.type||'aud')==='sbd'?'▸ SBD':'▸ AUD'}${s.partial?' <span class="show-partial">· '+escHtml(String(s.partial).toUpperCase())+'</span>':''}</div>
     </div>`;
   }).join('');
 }
@@ -1155,7 +1159,8 @@ async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen,skipSources
     updateHeartBtn();
     document.getElementById('show-date-big').textContent=`${MONTHS[m-1]} ${ds}, ${y}`;
     document.getElementById('show-venue-big').textContent=`${v}${c?' · '+c:''}`;
-    document.getElementById('show-meta').textContent=`${mp3s.length} TRACKS · ${isSbd?'SOUNDBOARD':'AUDIENCE TAPE'}`;
+    const partial=(SHOW_MAP[`${y}-${ms}-${ds}`]||{}).partial;
+    document.getElementById('show-meta').textContent=`${mp3s.length} TRACKS · ${isSbd?'SOUNDBOARD':'AUDIENCE TAPE'}${partial?' · '+String(partial).toUpperCase()+' ONLY':''}`;
     document.getElementById('track-count').textContent=`${mp3s.length} TRACKS`;
     tracks=mp3s.map((f,i)=>{const n=cleanName(f.title||f.name);return{name:n==='—'?`TRACK ${String(i+1).padStart(2,'0')}`:n,url:`https://archive.org/download/${identifier}/${encodeURIComponent(f.name)}`,duration:f.length||0};});
     currentTrack=0;

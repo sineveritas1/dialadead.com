@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 — DIAL·A·DEAD</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" sizes="64x64" href="https://res.cloudinary.com/dmbeoutyi/image/upload/w_64,h_64,c_fill/v1774666557/Untitled_design_16_v575qu.png">
+<meta name="theme-color" content="#39FF14">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:#050505;min-height:100%;font-family:'Share Tech Mono',monospace;}
+body{display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;min-height:100vh;}
+.wrap{max-width:420px;width:100%;}
+.logo{width:72px;height:72px;object-fit:contain;border-radius:10px;
+  filter:brightness(1.3) drop-shadow(0 0 12px #39FF1455);margin-bottom:18px;}
+.code{font-family:'Orbitron',monospace;font-size:clamp(48px,18vw,84px);font-weight:900;
+  color:#FF1493;text-shadow:0 0 18px #FF1493,0 0 40px #FF149366;letter-spacing:6px;line-height:1;}
+.msg{margin-top:14px;font-size:13px;letter-spacing:3px;color:#39FF14;text-shadow:0 0 8px #39FF1455;}
+.sub{margin-top:10px;font-size:11px;letter-spacing:2px;color:#00BFFF;text-shadow:0 0 8px #00BFFF44;line-height:2;}
+.home{display:inline-block;margin-top:24px;background:#FF1493;color:#fff;
+  font-family:'Orbitron',monospace;font-size:14px;font-weight:700;letter-spacing:3px;
+  padding:13px 26px;border-radius:8px;text-decoration:none;
+  box-shadow:0 0 16px #FF1493,0 0 32px #FF149555;text-shadow:0 0 8px rgba(255,255,255,.5);}
+.home:hover{background:#ff3aac;}
+.leds{display:flex;gap:6px;justify-content:center;margin-bottom:18px;}
+.led{width:8px;height:8px;border-radius:50%;}
+@keyframes ledpulse{0%,100%{opacity:1}50%{opacity:.15}}
+.led.p{background:#FF1493;box-shadow:0 0 7px #FF1493;animation:ledpulse 1.8s ease-in-out infinite;}
+.led.g{background:#39FF14;box-shadow:0 0 7px #39FF14;animation:ledpulse 1.8s ease-in-out infinite .6s;}
+.led.b{background:#00BFFF;box-shadow:0 0 7px #00BFFF;animation:ledpulse 1.8s ease-in-out infinite 1.2s;}
+html.purist,html.purist body{background:#fff;}
+html.purist .code{color:#CC0000;text-shadow:none;}
+html.purist .msg{color:#003087;text-shadow:none;}
+html.purist .sub{color:#555;text-shadow:none;}
+html.purist .logo{filter:none;}
+html.purist .home{background:#CC0000;box-shadow:none;text-shadow:none;}
+html.purist .led.p,html.purist .led.b{background:#CC0000;box-shadow:none;}
+html.purist .led.g{background:#003087;box-shadow:none;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="leds">
+      <div class="led p"></div><div class="led g"></div><div class="led b"></div>
+      <div class="led p"></div><div class="led g"></div><div class="led b"></div>
+    </div>
+    <img class="logo" src="https://res.cloudinary.com/dmbeoutyi/image/upload/v1774666557/Untitled_design_16_v575qu.png" alt="" onerror="this.style.display='none'">
+    <div class="code">404</div>
+    <div class="msg">☠ NO SIGNAL ON THIS FREQUENCY</div>
+    <div class="sub">
+      That page isn't in the archive.<br>
+      Dial a date between 1965 and 1995 instead.
+    </div>
+    <a class="home" href="/">◀ BACK TO THE DIAL</a>
+  </div>
+<script>if(localStorage.getItem('puristMode'))document.documentElement.classList.add('purist');</script>
+</body>
+</html>

@@ -1162,6 +1162,7 @@ async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen,skipSources
     const partial=(SHOW_MAP[`${y}-${ms}-${ds}`]||{}).partial;
     document.getElementById('show-meta').textContent=`${mp3s.length} TRACKS · ${isSbd?'SOUNDBOARD':'AUDIENCE TAPE'}${partial?' · '+String(partial).toUpperCase()+' ONLY':''}`;
     document.getElementById('track-count').textContent=`${mp3s.length} TRACKS`;
+    setShowSeo(currentShow,m,d,y,mp3s.length,isSbd);
     tracks=mp3s.map((f,i)=>{const n=cleanName(f.title||f.name);return{name:n==='—'?`TRACK ${String(i+1).padStart(2,'0')}`:n,url:`https://archive.org/download/${identifier}/${encodeURIComponent(f.name)}`,duration:f.length||0};});
     currentTrack=0;
     buildTracklist();
@@ -1631,6 +1632,53 @@ function shareShow(){
     t.classList.add('show');
     setTimeout(()=>t.classList.remove('show'),2500);
   }).catch(()=>{ prompt('Copy this link:',url); });
+}
+
+// ── Per-show page metadata ────────────────────────────────────────────────────
+// Every show lives at /?date=YYYY-MM-DD. Without this, all ~2,000 of those URLs
+// share one <title>/description, so search engines see them as duplicates of the
+// homepage and index none of them. Updating title, description and canonical as
+// a show loads gives each date a page of its own. Also keeps the browser tab and
+// any shared link preview showing the show you're actually listening to.
+const BASE_TITLE=document.title;
+const BASE_DESC=(document.querySelector('meta[name="description"]')||{}).content||'';
+function setMeta(sel,attr,val){
+  const el=document.querySelector(sel);
+  if(el) el.setAttribute(attr,val);
+}
+function setShowSeo(show,m,d,y,trackCount,isSbd){
+  if(!show){
+    document.title=BASE_TITLE;
+    setMeta('meta[name="description"]','content',BASE_DESC);
+    setMeta('link[rel="canonical"]','href','https://dialadead.com/');
+    setMeta('meta[property="og:url"]','content','https://dialadead.com/');
+    setMeta('meta[property="og:title"]','content',BASE_TITLE);
+    return;
+  }
+  const where=[show.venue,show.city].filter(Boolean).join(', ');
+  // Title-case, no zero padding — this text goes in search results and browser
+  // tabs, where the UI's all-caps "MAY 08" reads as shouting.
+  const MONTHS_LONG=['January','February','March','April','May','June','July',
+    'August','September','October','November','December'];
+  const dateLabel=`${MONTHS_LONG[m-1]} ${d}, ${y}`;
+  const title=`Grateful Dead ${dateLabel}${where?' — '+where:''} | DIAL·A·DEAD`;
+  const desc=`Stream the Grateful Dead concert from ${dateLabel}`
+    +(where?` at ${where}`:'')
+    +`. ${trackCount} tracks, ${isSbd?'soundboard':'audience'} recording, free from Archive.org.`;
+  const url=`https://dialadead.com/?date=${show.date}`;
+  document.title=title;
+  setMeta('meta[name="description"]','content',desc);
+  setMeta('link[rel="canonical"]','href',url);
+  setMeta('meta[property="og:url"]','content',url);
+  setMeta('meta[property="og:title"]','content',title);
+  setMeta('meta[property="og:description"]','content',desc);
+  setMeta('meta[name="twitter:title"]','content',title);
+  setMeta('meta[name="twitter:description"]','content',desc);
+  // Keep the address bar on the show you're hearing, so copying the URL or
+  // reloading lands on the same night. Relative on purpose — an absolute
+  // dialadead.com URL would throw on the preview deploys and localhost.
+  // replaceState, not pushState: browsing shows shouldn't stack up history.
+  try{history.replaceState(null,'',`?date=${show.date}`);}catch(e){}
 }
 
 function checkUrlDate(){

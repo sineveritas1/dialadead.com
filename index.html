@@ -206,7 +206,7 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
 /* ── BUTTONS ── */
 .btns{
   display:flex;
-  gap:10px;
+  gap:6px;
   margin-bottom:8px;
 }
 .btn-rnd{
@@ -214,9 +214,11 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
   color:#39FF14;
   border:2px solid #39FF1488;
   font-family:'Share Tech Mono',monospace;
-  font-size:clamp(11px,3.5vw,13px);
+  /* Three buttons share this row now (RANDOM · TODAY · ENGAGE) and the row must
+     not wrap to a second line — the panel height is deliberately fixed. */
+  font-size:clamp(10px,2.9vw,12px);
   letter-spacing:1px;
-  padding:13px clamp(10px,3vw,16px);
+  padding:13px clamp(6px,2.1vw,12px);
   border-radius:8px;
   cursor:pointer;
   box-shadow:0 0 8px #39FF1433;
@@ -794,6 +796,12 @@ html.purist .setup-box h3{color:#CC0000;}
 html.purist .setup-box code{background:#f5f5f5;border-color:#dddddd;color:#003087;}
 html.purist .setup-box p{color:#555555;}
 
+/* TODAY — same shape as RANDOM, blue so the two read as different actions */
+.btn-today{color:#00BFFF;border-color:#00BFFF88;box-shadow:0 0 8px #00BFFF33;}
+.btn-today:hover{background:#00BFFF15;box-shadow:0 0 16px #00BFFF;}
+html.purist .btn-today{color:#003087;border-color:#00308799;box-shadow:none;}
+html.purist .btn-today:hover{background:#e8eeff;box-shadow:none;}
+
 /* ENGAGE is armed and waiting for a press (set by RANDOM) */
 @keyframes engagewait{
   0%,100%{box-shadow:0 0 14px #FF1493, 0 0 28px #FF149555;transform:scale(1);}
@@ -898,6 +906,7 @@ html.purist .source-select option{background:#fff;color:#003087;}
   <!-- BUTTONS -->
   <div class="btns">
     <button class="btn-rnd" id="rnd-btn" onclick="randomShow()">⚡ RANDOM</button>
+    <button class="btn-rnd btn-today" id="today-btn" onclick="todayShow()">★ TODAY</button>
     <button class="btn-engage" id="ebtn" onclick="engage()">ENGAGE ▶</button>
   </div>
 
@@ -1082,6 +1091,7 @@ function renderShows(list){
 let dialTimer=null;
 function dialShow(dateStr){
   if(guardShowChange(()=>dialShow(dateStr))) return;
+  clearTimeout(nearestTimer);
   const[y,m,d]=dateStr.split('-').map(Number);
   document.getElementById('f-m').value=m;
   document.getElementById('f-d').value=d;
@@ -1111,6 +1121,7 @@ function setStatus(cls,html){
 async function engage(){
   if(guardShowChange(()=>engage())) return;
   disarmEngage();
+  clearTimeout(nearestTimer);   // a pending "jump to nearest" is superseded
   const m=parseInt(document.getElementById('f-m').value)||0;
   const d=parseInt(document.getElementById('f-d').value)||0;
   const y=parseInt(document.getElementById('f-y').value)||0;
@@ -1118,6 +1129,13 @@ async function engage(){
   if(m<1||m>12){setStatus('err','☠ INVALID MONTH · 1–12');return;}
   if(d<1||d>31){setStatus('err','☠ INVALID DAY · 1–31');return;}
   if(y<1965||y>1995){setStatus('err','☠ YEAR OUT OF RANGE · 1965–1995');return;}
+  // Reject dates that never existed (Feb 30, Apr 31) — the range checks above
+  // let those through, and they'd otherwise read as "no concert that night".
+  const probe=new Date(y,m-1,d);
+  if(probe.getMonth()!==m-1||probe.getDate()!==d){
+    setStatus('err',`☠ THAT DATE DOESN'T EXIST<br><span style="font-size:9px">${MONTHS[m-1]} HAS NO DAY ${d}</span>`);
+    return;
+  }
   const ms=String(m).padStart(2,'0'),ds=String(d).padStart(2,'0'),key=`${y}-${ms}-${ds}`;
   const gen=++loadGen;
   document.getElementById('ebtn').style.animation='eflash .4s ease';
@@ -1135,13 +1153,13 @@ async function engage(){
     if(!r.ok) throw new Error(`HTTP ${r.status}`);
     const data=await r.json();
     const docs=data.response?.docs||[];
-    if(!docs.length){setStatus('err',`☠ NO SHOW: ${ms}/${ds}/${y}<br><span style="font-size:9px">THE DEAD DID NOT PLAY THIS NIGHT</span>`);return;}
+    if(!docs.length){noShowHere(key,m,d,y);return;}
     const best=docs.sort((a,b)=>(/sbd|matrix/i.test(b.identifier)?1:0)-(/sbd|matrix/i.test(a.identifier)?1:0))[0];
     await loadShow(best.identifier,m,d,y,'','',/sbd|matrix/i.test(best.identifier)?'sbd':'aud',gen);
   }catch(e){
     clearTimeout(tid);
     if(gen!==loadGen) return;
-    setStatus('err',`☠ ARCHIVE OFFLINE`);
+    setStatus('err',`☠ CAN'T REACH ARCHIVE.ORG<br><span style="font-size:9px">CHECK YOUR CONNECTION AND TRY AGAIN</span>`);
   }
 }
 
@@ -1166,7 +1184,7 @@ async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen,skipSources
     }
     const seen=new Set();
     const mp3s=pool.filter(f=>{const n=trackKey(f.name);if(n===null)return true;if(seen.has(n))return false;seen.add(n);return true;});
-    if(!mp3s.length){setStatus('err','☠ NO AUDIO AVAILABLE');return;}
+    if(!mp3s.length){setStatus('err','☠ NO PLAYABLE AUDIO FOR THIS RECORDING<br><span style="font-size:9px">TRY ANOTHER SOURCE IN THE RECORDING LIST</span>');return;}
     const v=venue||meta.metadata?.venue||'';
     const c=city||meta.metadata?.coverage||'';
     const isSbd=type==='sbd'||/sbd|soundboard|matrix/i.test(identifier);
@@ -1186,7 +1204,7 @@ async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen,skipSources
     document.getElementById('status-panel').style.display='none';
     playTrack(0);
     if(!skipSources) loadSources(y,m,d,identifier,gen);
-  }catch(e){setStatus('err','☠ FAILED TO LOAD');}
+  }catch(e){setStatus('err','☠ COULDN\'T LOAD THIS RECORDING<br><span style="font-size:9px">ARCHIVE.ORG MAY BE BUSY — TRY AGAIN OR PICK ANOTHER SOURCE</span>');}
 }
 
 // ── Recording sources (all Archive.org recordings for a given date) ────────────
@@ -1661,9 +1679,93 @@ function randomShow(){
     +`<br><span style="font-size:10px">PRESS ENGAGE TO PLAY</span>`);
   armEngage();
 }
+// ── No show on that date ──────────────────────────────────────────────────────
+// The Dead didn't play every night, so a miss is normal, not an error the user
+// caused. Say so plainly, then carry them to the closest night they did play so
+// the dial never dead-ends.
+let nearestTimer=null;
+function nearestShowDate(key){
+  if(!ALL_SHOWS.length) return null;
+  let best=null,bestGap=Infinity;
+  const t=Date.parse(key+'T00:00:00Z');
+  for(const s of ALL_SHOWS){
+    const gap=Math.abs(Date.parse(s.date+'T00:00:00Z')-t);
+    if(gap<bestGap){bestGap=gap;best=s;}
+  }
+  return best?{show:best,days:Math.round(bestGap/86400000)}:null;
+}
+function noShowHere(key,m,d,y){
+  const ms=String(m).padStart(2,'0'),ds=String(d).padStart(2,'0');
+  const near=nearestShowDate(key);
+  if(!near){
+    setStatus('err',`☠ SORRY — NO CONCERT ON ${ms}/${ds}/${y}`);
+    return;
+  }
+  const[ny,nm,nd]=near.show.date.split('-').map(Number);
+  const where=[near.show.venue,near.show.city].filter(Boolean).join(' · ');
+  setStatus('err',
+    `☠ SORRY — NO CONCERT ON ${ms}/${ds}/${y}`
+    +`<br><span style="font-size:9px">THE DEAD DIDN'T PLAY THIS NIGHT</span>`
+    +`<br><span style="font-size:10px;color:#39FF14">⟳ JUMPING TO NEAREST · `
+    +`${MONTHS[nm-1]} ${String(nd).padStart(2,'0')} ${ny}</span>`
+    +(where?`<br><span style="font-size:9px">${escHtml(where)}</span>`:''));
+  // Long enough to read the message before the screen changes under them.
+  clearTimeout(nearestTimer);
+  nearestTimer=setTimeout(()=>dialShow(near.show.date),2200);
+}
+
 // Pulse the ENGAGE button until it's pressed.
 function armEngage(){document.getElementById('ebtn').classList.add('waiting');}
 function disarmEngage(){document.getElementById('ebtn').classList.remove('waiting');}
+
+// ── TODAY — "on this day" in Dead history ─────────────────────────────────────
+// Uses the visitor's LOCAL calendar day (not UTC), so someone dialling in at
+// 8pm on the 16th gets the 16th, not tomorrow. Like RANDOM it only dials; it
+// leaves ENGAGE pulsing rather than playing on its own.
+// 358 of the 366 calendar days have at least one show; the handful that don't
+// (Christmas, Feb 29, a few others) fall back to the closest day that does.
+let todayIdx=0, todayKey='';
+function showsOnMonthDay(md){return ALL_SHOWS.filter(s=>s.date.slice(5)===md);}
+function todayShow(){
+  if(!ALL_SHOWS.length) return;
+  if(guardShowChange(()=>todayShow())) return;
+  const now=new Date();
+  const md=`${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  let list=showsOnMonthDay(md), usedMd=md, offset=0;
+  if(!list.length){
+    // Walk outwards a day at a time until we land on a night they played.
+    for(let i=1;i<=10&&!list.length;i++){
+      for(const dir of [-1,1]){
+        const probe=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i*dir);
+        const pmd=`${String(probe.getMonth()+1).padStart(2,'0')}-${String(probe.getDate()).padStart(2,'0')}`;
+        const found=showsOnMonthDay(pmd);
+        if(found.length){list=found;usedMd=pmd;offset=i*dir;break;}
+      }
+    }
+  }
+  if(!list.length){setStatus('err','☠ NOTHING ON THIS DAY');return;}
+  // Pressing TODAY again steps through the other years on this date rather than
+  // re-rolling at random, so you can walk the whole day's history.
+  if(usedMd!==todayKey){todayKey=usedMd;todayIdx=0;} else {todayIdx=(todayIdx+1)%list.length;}
+  const s=list[todayIdx];
+  const[y,m,d]=s.date.split('-').map(Number);
+  clearTimeout(dialTimer);
+  document.getElementById('f-m').value=m;
+  document.getElementById('f-d').value=d;
+  document.getElementById('f-y').value=y;
+  document.getElementById('archive-body').classList.remove('open');
+  document.getElementById('toggle-arrow').classList.remove('open');
+  document.getElementById('player-panel').classList.remove('visible');
+  window.scrollTo({top:0,behavior:'smooth'});
+  const where=[s.venue,s.city].filter(Boolean).join(' · ');
+  const head=offset
+    ? `★ NO SHOW TODAY — NEAREST: ${MONTHS[m-1]} ${String(d).padStart(2,'0')}`
+    : `★ ON THIS DAY · ${MONTHS[m-1]} ${String(d).padStart(2,'0')}`;
+  setStatus('ok',`${head} · ${y}`
+    +`<br><span style="font-size:9px">${escHtml(where||'—')}</span>`
+    +`<br><span style="font-size:10px">${todayIdx+1} OF ${list.length} · PRESS ENGAGE TO PLAY</span>`);
+  armEngage();
+}
 
 function shareShow(){
   const m=document.getElementById('f-m').value;

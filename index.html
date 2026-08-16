@@ -1588,10 +1588,11 @@ audio.addEventListener('loadedmetadata',updatePositionState);
 
 // ── Playback ──────────────────────────────────────────────────────────────────
 let playGen=0;
-function playTrack(i){
+function playTrack(i,auto){
   if(!tracks.length||i<0||i>=tracks.length) return;
   const gen=++playGen;
   currentTrack=i;
+  if(!auto) deadSkips=0;        // a deliberate tap always gets a fresh chance
   // Reassigning src implicitly aborts the previous load. We deliberately do NOT
   // set src='' first — that briefly drops the media session and is the classic
   // cause of playback stalling after a track or two when backgrounded.
@@ -1611,14 +1612,19 @@ function togglePlay(){
 function prevTrack(){audio.currentTime>3?audio.currentTime=0:playTrack(Math.max(0,currentTrack-1));}
 function nextTrack(){if(currentTrack<tracks.length-1) playTrack(currentTrack+1);}
 // ── Dropout recovery ──────────────────────────────────────────────────────────
-// Archive.org streams over a phone connection drop out fairly often. Both of the
-// events below used to advance the track unconditionally, which turned a
-// momentary dropout into "the song jumps after a few seconds" — the track hadn't
-// finished and the file was fine, we just gave up on it. Now a track that has
-// actually started playing is resumed from where it stopped; we only move on
-// when a track never managed to play at all.
-const MAX_RESUME=3;
-let resumeIdx=-1, resumeTries=0;
+// Archive.org drops connections often over a phone: a tower handoff, a wifi/LTE
+// switch or a 503 burst refuses every request for a few seconds. Counting "no
+// bytes arrived" as "this file is broken" made the setlist walk itself several
+// tracks deep, one skip per refused connection, until the network came back —
+// which is what "it jumps from track 1 and lands somewhere deeper" was.
+//
+// So: a failed connection costs a RETRY OF THE SAME TRACK, never a skip. How far
+// the track got doesn't decide it — dying at 0:00 is the common case, not a sign
+// of a bad file. We only move on once a track has refused MAX_RESUME times, and
+// after MAX_SKIP dead tracks in a row with nothing playing we stop rather than
+// race to the end of the show and lose the listener's place.
+const MAX_RESUME=3, MAX_SKIP=2;
+let resumeIdx=-1, resumeTries=0, deadSkips=0;
 function resumeCurrent(pos,gen,idx){
   resumeTries++;
   setTimeout(()=>{
@@ -1633,6 +1639,9 @@ function resumeCurrent(pos,gen,idx){
   },500*resumeTries);
 }
 audio.addEventListener('ended',()=>{
+  // Nothing loaded => this 'ended' was queued for a source we already swapped
+  // out. Acting on it would advance a second time on top of the swap itself.
+  if(audio.readyState===0) return;
   // A truncated stream surfaces as a premature 'ended'. If we're well short of
   // the track's real length, that's a dropout, not the end of the song.
   const dur=audio.duration;
@@ -1646,14 +1655,22 @@ audio.addEventListener('ended',()=>{
   else document.getElementById('play-pause-btn').classList.add('paused');
 });
 audio.addEventListener('error',()=>{
-  if(!audio.error) return;            // spurious event with nothing to act on
+  // No error object => stale event from a source we already replaced. Code 1 is
+  // MEDIA_ERR_ABORTED, i.e. our own src swap; neither is the track's fault.
+  if(!audio.error||audio.error.code===1) return;
   const gen=playGen, idx=currentTrack, pos=audio.currentTime||0;
   if(idx!==resumeIdx){resumeIdx=idx;resumeTries=0;}
-  // Already playing => transient network failure. Pick it back up.
-  if(pos>1&&resumeTries<MAX_RESUME){resumeCurrent(pos,gen,idx);return;}
-  // Never got going, or we've retried enough: the file itself is unplayable.
+  // Every error is a dropout until proven otherwise: retry this track.
+  if(resumeTries<MAX_RESUME){resumeCurrent(pos,gen,idx);return;}
+  // Retried and still nothing — this file really is unplayable, so move on. But
+  // a run of dead tracks means the connection is gone, not that the show is.
+  if(++deadSkips>MAX_SKIP){
+    document.getElementById('play-pause-btn').classList.add('paused');
+    setStatus('err','☠ LOST THE SIGNAL<br><span style="font-size:9px">ARCHIVE.ORG STOPPED ANSWERING — HIT PLAY TO PICK IT BACK UP</span>');
+    return;
+  }
   if(tracks.length&&idx<tracks.length-1){
-    setTimeout(()=>{if(gen===playGen&&currentTrack===idx) playTrack(idx+1);},800);
+    setTimeout(()=>{if(gen===playGen&&currentTrack===idx) playTrack(idx+1,true);},800);
   }else{
     document.getElementById('play-pause-btn').classList.add('paused');
   }
@@ -1672,6 +1689,8 @@ audio.addEventListener('timeupdate',()=>{
     // A stretch of clean playback earns the dropout budget back, so a long track
     // that hiccups a few times over 20 minutes doesn't run out of retries.
     if(resumeTries&&audio.currentTime>30){resumeIdx=-1;resumeTries=0;}
+    // Likewise, a track that really got going means the connection came back.
+    if(deadSkips&&audio.currentTime>10) deadSkips=0;
     updatePositionState();
   });
 });

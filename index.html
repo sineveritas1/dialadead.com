@@ -1511,7 +1511,11 @@ function scrollActiveIntoView(smooth){
   // Scroll the tracklist itself rather than calling scrollIntoView, which walks
   // up and can move the document scroll position too. Keeping it inside the
   // container means playback never moves the page under the user.
-  const top=a.offsetTop-list.clientHeight/2+a.offsetHeight/2;
+  // Measure with rects, NOT offsetTop: .tracklist isn't positioned, so offsetTop
+  // is relative to .player-panel and would include the whole date/venue/transport
+  // block above the list — which overshoots the playing track by ~300px.
+  const ar=a.getBoundingClientRect(),lr=list.getBoundingClientRect();
+  const top=list.scrollTop+(ar.top-lr.top)-list.clientHeight/2+ar.height/2;
   const max=list.scrollHeight-list.clientHeight;
   list.scrollTo({top:Math.max(0,Math.min(top,max)),behavior:smooth===false?'auto':'smooth'});
 }

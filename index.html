@@ -794,6 +794,21 @@ html.purist .setup-box h3{color:#CC0000;}
 html.purist .setup-box code{background:#f5f5f5;border-color:#dddddd;color:#003087;}
 html.purist .setup-box p{color:#555555;}
 
+/* ENGAGE is armed and waiting for a press (set by RANDOM) */
+@keyframes engagewait{
+  0%,100%{box-shadow:0 0 14px #FF1493, 0 0 28px #FF149555;transform:scale(1);}
+  50%    {box-shadow:0 0 26px #FF1493, 0 0 60px #FF1493cc;transform:scale(1.035);}
+}
+.btn-engage.waiting{animation:engagewait 1.05s ease-in-out infinite;}
+@keyframes engagewaitP{
+  0%,100%{box-shadow:0 0 0 0 rgba(204,0,0,.55);transform:scale(1);}
+  50%    {box-shadow:0 0 0 7px rgba(204,0,0,0);transform:scale(1.035);}
+}
+html.purist .btn-engage.waiting{animation:engagewaitP 1.05s ease-in-out infinite;}
+@media (prefers-reduced-motion:reduce){
+  .btn-engage.waiting,html.purist .btn-engage.waiting{animation:none;outline:2px solid #39FF14;outline-offset:2px;}
+}
+
 /* Incomplete recording marker (set1/set2/partial) — from shows.json */
 .show-partial{color:#FFA50099;letter-spacing:1px;}
 html.purist .show-partial{color:#88888899;}
@@ -1095,6 +1110,7 @@ function setStatus(cls,html){
 // ── Engage ────────────────────────────────────────────────────────────────────
 async function engage(){
   if(guardShowChange(()=>engage())) return;
+  disarmEngage();
   const m=parseInt(document.getElementById('f-m').value)||0;
   const d=parseInt(document.getElementById('f-d').value)||0;
   const y=parseInt(document.getElementById('f-y').value)||0;
@@ -1248,6 +1264,13 @@ function cleanName(raw){
   // Strip full GD prefix including arbitrary mid-path tokens
   // handles: gd82-08-08d1t01, gd1982-08-08.sbd.miller.31175.sbeok.d1t01, etc.
   s=s.replace(/^gd\d{2,4}[.\-]\d{2}[.\-]\d{2}(\.[a-z0-9]+)*[\s._\-]*(d\d+)?(s\d+)?t\d+[._\-\s]*/i,'');
+  // Same prefix but with a bare track number instead of a t01-style code, and
+  // any separator (or none) between the date parts. Covers the very common
+  // "gd84-04-30 02 Iko Iko" title style and run-together "Gd84-04-3002IkoIko".
+  // Kept as a separate pass on purpose: folding it into the rule above lets the
+  // greedy (\.[a-z0-9]+)* arm swallow the song name when the track code is
+  // optional, which blanks names like "...sbeok.d2t03.Truckin".
+  s=s.replace(/^gd[\s._-]*\d{2,4}[.\-\s_]?\d{2}[.\-\s_]?\d{2}[\s._\-]*(?:(?:[ds]\d+)?t?\d{1,3})?[\s._\-]*/i,'');
   // Strip GratefulDead full-name prefix only when a song name (letter) follows the track code
   // e.g. GratefulDead1994-06-18s1t01-DarkStarReprise → "DarkStarReprise"
   s=s.replace(/^grateful[\s._-]*dead[\s\d._-]*(s\d+)?(t\d+)?[\s._-]*(?=[a-zA-Z])/i,'');
@@ -1269,6 +1292,9 @@ function cleanName(raw){
   s=s.replace(/\s+/g,' ').trim();
   // Strip leading/trailing stray punctuation (orphaned > . - etc)
   s=s.replace(/^[^a-zA-Z0-9(]+|[^a-zA-Z0-9'")]+$/g,'').trim();
+  // Split run-together CamelCase, but only when nothing is spaced already —
+  // taper filenames often carry the song as one token (IkoIko, MyBrotherEsau).
+  if(s&&!/\s/.test(s)&&/[a-z][A-Z]/.test(s)) s=s.replace(/([a-z])([A-Z])/g,'$1 $2');
   // Title-case if all lowercase
   if(s&&s===s.toLowerCase()) s=s.replace(/\b\w/g,c=>c.toUpperCase());
   // Normalize to canonical Grateful Dead song titles when we recognize the track
@@ -1613,11 +1639,31 @@ function formatTime(s){
 }
 
 // ── Random ────────────────────────────────────────────────────────────────────
+// RANDOM only dials the date — it deliberately does NOT play. The ENGAGE button
+// pulses so it's obvious the machine is loaded and waiting on you to pull the
+// lever, which is half the fun of a time machine.
 function randomShow(){
   if(!ALL_SHOWS.length) return;
   if(guardShowChange(()=>randomShow())) return;
-  dialShow(ALL_SHOWS[Math.floor(Math.random()*ALL_SHOWS.length)].date);
+  const s=ALL_SHOWS[Math.floor(Math.random()*ALL_SHOWS.length)];
+  const[y,m,d]=s.date.split('-').map(Number);
+  clearTimeout(dialTimer);           // cancel any engage queued by a prior dial
+  document.getElementById('f-m').value=m;
+  document.getElementById('f-d').value=d;
+  document.getElementById('f-y').value=y;
+  document.getElementById('archive-body').classList.remove('open');
+  document.getElementById('toggle-arrow').classList.remove('open');
+  document.getElementById('player-panel').classList.remove('visible');
+  window.scrollTo({top:0,behavior:'smooth'});
+  const where=[s.venue,s.city].filter(Boolean).join(' · ');
+  setStatus('ok',`⚡ ${MONTHS[m-1]} ${String(d).padStart(2,'0')} ${y} DIALED`
+    +(where?`<br><span style="font-size:9px">${escHtml(where)}</span>`:'')
+    +`<br><span style="font-size:10px">PRESS ENGAGE TO PLAY</span>`);
+  armEngage();
 }
+// Pulse the ENGAGE button until it's pressed.
+function armEngage(){document.getElementById('ebtn').classList.add('waiting');}
+function disarmEngage(){document.getElementById('ebtn').classList.remove('waiting');}
 
 function shareShow(){
   const m=document.getElementById('f-m').value;

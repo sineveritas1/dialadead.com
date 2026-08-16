@@ -1567,7 +1567,11 @@ function updatePositionState(){
   if(!audio.duration||!isFinite(audio.duration)) return;
   try{ms.setPositionState({duration:audio.duration,playbackRate:audio.playbackRate||1,position:Math.min(audio.currentTime,audio.duration)});}catch(e){}
 }
-audio.preload='auto';
+// Deliberately NOT preload='auto'. Forcing it makes the browser pull the whole
+// 10-15MB file as fast as it can, which archive.org is liable to throttle or cut
+// off mid-stream — and a cut stream is what surfaced as songs jumping ahead.
+// Background playback is held by the Media Session, not by preloading, and the
+// browser still buffers ahead normally once playback starts.
 audio.setAttribute('playsinline','');
 audio.addEventListener('play',()=>{
   if('mediaSession' in navigator) navigator.mediaSession.playbackState='playing';
@@ -1591,6 +1595,7 @@ function playTrack(i){
   const p=audio.play();
   if(p) p.catch(e=>{if(gen!==playGen||e.name==='AbortError') return;});
   document.getElementById('play-pause-btn').classList.remove('paused');
+  resumeIdx=-1;resumeTries=0;   // fresh track, fresh dropout budget
   updateActive();
   updateMediaSession();
 }
@@ -1601,14 +1606,50 @@ function togglePlay(){
 }
 function prevTrack(){audio.currentTime>3?audio.currentTime=0:playTrack(Math.max(0,currentTrack-1));}
 function nextTrack(){if(currentTrack<tracks.length-1) playTrack(currentTrack+1);}
+// ── Dropout recovery ──────────────────────────────────────────────────────────
+// Archive.org streams over a phone connection drop out fairly often. Both of the
+// events below used to advance the track unconditionally, which turned a
+// momentary dropout into "the song jumps after a few seconds" — the track hadn't
+// finished and the file was fine, we just gave up on it. Now a track that has
+// actually started playing is resumed from where it stopped; we only move on
+// when a track never managed to play at all.
+const MAX_RESUME=3;
+let resumeIdx=-1, resumeTries=0;
+function resumeCurrent(pos,gen,idx){
+  resumeTries++;
+  setTimeout(()=>{
+    if(gen!==playGen||currentTrack!==idx||!tracks[idx]) return;
+    audio.src=tracks[idx].url;
+    audio.addEventListener('loadedmetadata',function seek(){
+      audio.removeEventListener('loadedmetadata',seek);
+      try{if(pos>0&&pos<(audio.duration||Infinity)) audio.currentTime=pos;}catch(e){}
+    },{once:true});
+    const p=audio.play();
+    if(p) p.catch(()=>{});
+  },500*resumeTries);
+}
 audio.addEventListener('ended',()=>{
+  // A truncated stream surfaces as a premature 'ended'. If we're well short of
+  // the track's real length, that's a dropout, not the end of the song.
+  const dur=audio.duration;
+  if(dur&&isFinite(dur)&&audio.currentTime<dur-2&&resumeTries<MAX_RESUME){
+    if(currentTrack!==resumeIdx){resumeIdx=currentTrack;resumeTries=0;}
+    resumeCurrent(audio.currentTime,playGen,currentTrack);
+    return;
+  }
+  resumeIdx=-1;resumeTries=0;
   if(currentTrack<tracks.length-1) playTrack(currentTrack+1);
   else document.getElementById('play-pause-btn').classList.add('paused');
 });
 audio.addEventListener('error',()=>{
-  const gen=playGen;
-  if(tracks.length&&currentTrack<tracks.length-1){
-    setTimeout(()=>{if(gen===playGen) playTrack(currentTrack+1);},800);
+  if(!audio.error) return;            // spurious event with nothing to act on
+  const gen=playGen, idx=currentTrack, pos=audio.currentTime||0;
+  if(idx!==resumeIdx){resumeIdx=idx;resumeTries=0;}
+  // Already playing => transient network failure. Pick it back up.
+  if(pos>1&&resumeTries<MAX_RESUME){resumeCurrent(pos,gen,idx);return;}
+  // Never got going, or we've retried enough: the file itself is unplayable.
+  if(tracks.length&&idx<tracks.length-1){
+    setTimeout(()=>{if(gen===playGen&&currentTrack===idx) playTrack(idx+1);},800);
   }else{
     document.getElementById('play-pause-btn').classList.add('paused');
   }
@@ -1624,6 +1665,9 @@ audio.addEventListener('timeupdate',()=>{
     document.getElementById('progress-fill').style.width=pct;
     document.getElementById('progress-thumb').style.left=pct;
     document.getElementById('time-display').textContent=`${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+    // A stretch of clean playback earns the dropout budget back, so a long track
+    // that hiccups a few times over 20 minutes doesn't run out of retries.
+    if(resumeTries&&audio.currentTime>30){resumeIdx=-1;resumeTries=0;}
     updatePositionState();
   });
 });

@@ -900,7 +900,7 @@ html.purist .source-select option{background:#fff;color:#003087;}
         </div>
       </div>
     </div>
-    <div class="dest-hint">TYPE DATE · MONTH / DAY / YEAR · TAP ENGAGE</div>
+    <div class="dest-hint">TYPE DATE · LEAVE A FIELD BLANK FOR ANY · TAP ENGAGE</div>
   </div>
 
   <!-- BUTTONS -->
@@ -1122,13 +1122,20 @@ async function engage(){
   if(guardShowChange(()=>engage())) return;
   disarmEngage();
   clearTimeout(nearestTimer);   // a pending "jump to nearest" is superseded
-  const m=parseInt(document.getElementById('f-m').value)||0;
-  const d=parseInt(document.getElementById('f-d').value)||0;
-  const y=parseInt(document.getElementById('f-y').value)||0;
-  if(!m||!d||!y){setStatus('err','☠ INCOMPLETE DATE');return;}
-  if(m<1||m>12){setStatus('err','☠ INVALID MONTH · 1–12');return;}
-  if(d<1||d>31){setStatus('err','☠ INVALID DAY · 1–31');return;}
-  if(y<1965||y>1995){setStatus('err','☠ YEAR OUT OF RANGE · 1965–1995');return;}
+  // A blank field means "any" — leaving the year empty on 8/16 plays a show
+  // from some August 16th, whichever year. Only the fields actually filled in
+  // are validated, and any blank one puts us on the wildcard path below.
+  const mRaw=String(document.getElementById('f-m').value).trim();
+  const dRaw=String(document.getElementById('f-d').value).trim();
+  const yRaw=String(document.getElementById('f-y').value).trim();
+  const m=parseInt(mRaw)||0, d=parseInt(dRaw)||0, y=parseInt(yRaw)||0;
+  if(mRaw!==''&&(m<1||m>12)){setStatus('err','☠ INVALID MONTH · 1–12');return;}
+  if(dRaw!==''&&(d<1||d>31)){setStatus('err','☠ INVALID DAY · 1–31');return;}
+  if(yRaw!==''&&(y<1965||y>1995)){setStatus('err','☠ YEAR OUT OF RANGE · 1965–1995');return;}
+  if(mRaw===''||dRaw===''||yRaw===''){
+    wildcardEngage(mRaw===''?null:m,dRaw===''?null:d,yRaw===''?null:y);
+    return;
+  }
   // Reject dates that never existed (Feb 30, Apr 31) — the range checks above
   // let those through, and they'd otherwise read as "no concert that night".
   const probe=new Date(y,m-1,d);
@@ -1679,6 +1686,49 @@ function randomShow(){
     +`<br><span style="font-size:10px">PRESS ENGAGE TO PLAY</span>`);
   armEngage();
 }
+// ── Wildcard dates ────────────────────────────────────────────────────────────
+// Any field left blank matches everything: 8 / 16 / blank is "every August 16",
+// blank / blank / 1977 is "anywhere in '77". ENGAGE plays one match and each
+// further press steps to the next, so the pattern stays loaded in the dial and
+// you can keep pulling the lever. Matching runs against the show index only, so
+// a wildcard can never land on a night with nothing to play.
+let wildKey='', wildIdx=0;
+function wildcardMatches(m,d,y){
+  return ALL_SHOWS.filter(s=>
+    (m===null||+s.date.slice(5,7)===m)&&
+    (d===null||+s.date.slice(8,10)===d)&&
+    (y===null||+s.date.slice(0,4)===y));
+}
+function wildcardLabel(m,d,y){
+  return [m===null?'ANY MONTH':MONTHS[m-1],
+          d===null?'ANY DAY':String(d).padStart(2,'0'),
+          y===null?'ANY YEAR':y].join(' ');
+}
+function wildcardEngage(m,d,y){
+  if(!ALL_SHOWS.length){setStatus('err','☠ SHOW INDEX NOT LOADED');return;}
+  const list=wildcardMatches(m,d,y);
+  const label=wildcardLabel(m,d,y);
+  if(!list.length){
+    setStatus('err',`☠ SORRY — NO CONCERT MATCHES<br><span style="font-size:10px">${escHtml(label)}</span>`);
+    return;
+  }
+  const key=`${m}|${d}|${y}`;
+  if(key!==wildKey){wildKey=key;wildIdx=Math.floor(Math.random()*list.length);}
+  else{wildIdx=(wildIdx+1)%list.length;}
+  const s=list[wildIdx];
+  const[sy,sm,sd]=s.date.split('-').map(Number);
+  const gen=++loadGen;
+  document.getElementById('ebtn').style.animation='eflash .4s ease';
+  setTimeout(()=>document.getElementById('ebtn').style.animation='',450);
+  document.getElementById('player-panel').classList.remove('visible');
+  const where=[s.venue,s.city].filter(Boolean).join(' · ');
+  setStatus('',`<span class="loading">⟳</span> ${escHtml(label)} · ${list.length} MATCH${list.length===1?'':'ES'}`
+    +`<br><span style="font-size:10px">${wildIdx+1} OF ${list.length}`
+    +(list.length>1?' · ENGAGE AGAIN FOR NEXT':'')+`</span>`
+    +(where?`<br><span style="font-size:9px">${escHtml(where)}</span>`:''));
+  loadShow(s.id,sm,sd,sy,s.venue,s.city,s.type,gen);
+}
+
 // ── No show on that date ──────────────────────────────────────────────────────
 // The Dead didn't play every night, so a miss is normal, not an error the user
 // caused. Say so plainly, then carry them to the closest night they did play so
@@ -1768,13 +1818,17 @@ function todayShow(){
 }
 
 function shareShow(){
-  const m=document.getElementById('f-m').value;
-  const d=document.getElementById('f-d').value;
-  const y=document.getElementById('f-y').value;
-  if(!m||!d||!y) return;
-  const ms=String(parseInt(m)).padStart(2,'0');
-  const ds=String(parseInt(d)).padStart(2,'0');
-  const url=`${window.location.origin}${window.location.pathname}?date=${y}-${ms}-${ds}`;
+  // Share whatever is actually loaded, not what's typed — with wildcards the
+  // date fields can be blank while a real show is playing.
+  let date=currentShow&&currentShow.date;
+  if(!date){
+    const m=document.getElementById('f-m').value;
+    const d=document.getElementById('f-d').value;
+    const y=document.getElementById('f-y').value;
+    if(!m||!d||!y) return;
+    date=`${y}-${String(parseInt(m)).padStart(2,'0')}-${String(parseInt(d)).padStart(2,'0')}`;
+  }
+  const url=`${window.location.origin}${window.location.pathname}?date=${date}`;
   navigator.clipboard.writeText(url).then(()=>{
     const t=document.getElementById('share-toast');
     t.classList.add('show');

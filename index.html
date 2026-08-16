@@ -1171,12 +1171,43 @@ async function engage(){
 }
 
 // ── Load show ─────────────────────────────────────────────────────────────────
-async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen,skipSources=false){
+// One flaky request used to dead-end an entire night: a single metadata fetch,
+// and ANY failure printed "COULDN'T LOAD THIS RECORDING". Archive.org times out
+// or throttles often enough on a phone that this was the most common way to end
+// up staring at nothing. Now the fetch is retried, and if the indexed recording
+// still won't answer we fall back to a different recording of the same night —
+// most dates have several, so the show is almost never really unavailable.
+async function fetchMeta(identifier,gen,tries=3){
+  for(let i=0;;i++){
+    if(gen!==loadGen) return null;
+    try{
+      const r=await fetchWithTimeout(`https://archive.org/metadata/${identifier}`,15000);
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return await r.json();
+    }catch(e){
+      if(i>=tries-1) throw e;
+      await new Promise(res=>setTimeout(res,800*(i+1)));
+    }
+  }
+}
+async function loadAltRecording(badId,m,d,y,gen){
+  const key=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
   try{
-    const r=await fetchWithTimeout(`https://archive.org/metadata/${identifier}`,15000);
-    if(gen!==loadGen) return;
-    const meta=await r.json();
-    if(gen!==loadGen) return;
+    const q=`collection:(GratefulDead) AND date:${key}`;
+    const r=await fetchWithTimeout(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}&fl[]=identifier&rows=20&output=json`,12000);
+    const docs=(await r.json()).response?.docs||[];
+    if(gen!==loadGen) return true;      // superseded — caller must not overwrite
+    const alt=docs.map(x=>x.identifier).filter(id=>id&&id!==badId)
+      .sort((a,b)=>(/sbd|matrix/i.test(b)?1:0)-(/sbd|matrix/i.test(a)?1:0));
+    if(!alt.length) return false;
+    await loadShow(alt[0],m,d,y,'','',/sbd|matrix/i.test(alt[0])?'sbd':'aud',gen,false,true);
+    return true;
+  }catch(e){return false;}
+}
+async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen,skipSources=false,noAlt=false){
+  try{
+    const meta=await fetchMeta(identifier,gen);
+    if(gen!==loadGen||!meta) return;
     const allMp3s=(meta.files||[]).filter(f=>f.name.toLowerCase().endsWith('.mp3'));
     // Prefer full-quality over low-bitrate duplicates; filter known low-quality variants
     const hiQ=allMp3s.filter(f=>!/[._](64|128)kb?\.mp3$/i.test(f.name)&&!/_vbr\.mp3$/i.test(f.name));
@@ -1211,7 +1242,17 @@ async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen,skipSources
     document.getElementById('status-panel').style.display='none';
     playTrack(0);
     if(!skipSources) loadSources(y,m,d,identifier,gen);
-  }catch(e){setStatus('err','☠ COULDN\'T LOAD THIS RECORDING<br><span style="font-size:9px">ARCHIVE.ORG MAY BE BUSY — TRY AGAIN OR PICK ANOTHER SOURCE</span>');}
+  }catch(e){
+    if(gen!==loadGen) return;
+    // Before telling the listener the night is unavailable, try another
+    // recording of it — this one may just be a bad item on a busy day.
+    if(!noAlt){
+      setStatus('',`<span class="loading">⟳</span> TRYING ANOTHER RECORDING...`);
+      if(await loadAltRecording(identifier,m,d,y,gen)) return;
+      if(gen!==loadGen) return;
+    }
+    setStatus('err','☠ COULDN\'T LOAD THIS RECORDING<br><span style="font-size:9px">ARCHIVE.ORG MAY BE BUSY — TRY AGAIN OR PICK ANOTHER SOURCE</span>');
+  }
 }
 
 // ── Recording sources (all Archive.org recordings for a given date) ────────────
@@ -1600,12 +1641,22 @@ function playTrack(i,auto){
   const p=audio.play();
   if(p) p.catch(e=>{if(gen!==playGen||e.name==='AbortError') return;});
   document.getElementById('play-pause-btn').classList.remove('paused');
-  resumeIdx=-1;resumeTries=0;   // fresh track, fresh dropout budget
+  resumeIdx=-1;resumeTries=0;lastPos=0;   // fresh track, fresh dropout budget
   updateActive();
   updateMediaSession();
 }
 function togglePlay(){
   if(!tracks.length) return;
+  // Coming back from a failed stream: the element has an error and nothing
+  // loaded, so play() on its own does nothing at all and the button looks dead.
+  // Reload the track and pick up where the signal dropped.
+  if(audio.error||audio.readyState===0){
+    document.getElementById('status-panel').style.display='none';
+    resumeIdx=currentTrack;resumeTries=0;deadSkips=0;
+    resumeCurrent(lastPos,playGen,currentTrack);
+    document.getElementById('play-pause-btn').classList.remove('paused');
+    return;
+  }
   if(audio.paused){audio.play().catch(()=>{});document.getElementById('play-pause-btn').classList.remove('paused');}
   else{audio.pause();document.getElementById('play-pause-btn').classList.add('paused');}
 }
@@ -1624,7 +1675,7 @@ function nextTrack(){if(currentTrack<tracks.length-1) playTrack(currentTrack+1);
 // after MAX_SKIP dead tracks in a row with nothing playing we stop rather than
 // race to the end of the show and lose the listener's place.
 const MAX_RESUME=3, MAX_SKIP=2;
-let resumeIdx=-1, resumeTries=0, deadSkips=0;
+let resumeIdx=-1, resumeTries=0, deadSkips=0, lastPos=0;
 function resumeCurrent(pos,gen,idx){
   resumeTries++;
   setTimeout(()=>{
@@ -1636,7 +1687,10 @@ function resumeCurrent(pos,gen,idx){
     },{once:true});
     const p=audio.play();
     if(p) p.catch(()=>{});
-  },500*resumeTries);
+    // Space the retries out rather than hammering: archive.org throttles a
+    // client that re-requests hard, and a throttled IP fails everything —
+    // including the metadata fetch, which reads as "nothing loads at all".
+  },800*resumeTries);
 }
 audio.addEventListener('ended',()=>{
   // Nothing loaded => this 'ended' was queued for a source we already swapped
@@ -1691,6 +1745,7 @@ audio.addEventListener('timeupdate',()=>{
     if(resumeTries&&audio.currentTime>30){resumeIdx=-1;resumeTries=0;}
     // Likewise, a track that really got going means the connection came back.
     if(deadSkips&&audio.currentTime>10) deadSkips=0;
+    lastPos=audio.currentTime;   // where to pick up if the stream drops
     updatePositionState();
   });
 });

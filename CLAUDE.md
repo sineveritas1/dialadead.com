@@ -181,9 +181,54 @@ simpler and needs no secrets, so prefer it unless you specifically want CI.
 
 ## Notes / gotchas
 
+### "The site stopped loading shows" — CHECK ARCHIVE.ORG FIRST
+
+**Do this before reading a single line of code:**
+
+```bash
+curl -sS -o /dev/null -w '%{http_code}\n' https://archive.org/
+```
+
+`503` means Archive.org is **globally offline** and there is nothing to fix here.
+They serve a "Internet Archive services are temporarily offline" page. It happens,
+and it takes every Dead-streaming site down with it.
+
+This matters because the app streams from Archive.org **directly in the visitor's
+browser** — there is no backend proxying anything. Any Archive.org problem
+surfaces as *this* site being broken, and **rolling the site back does not help**,
+which reads exactly like a code regression you just shipped. On 2026-08-16 that
+cost an afternoon: three releases and a production rollback chasing a phantom,
+while Archive.org was simply down.
+
+Distinguish the two external failure modes:
+
+| check | meaning |
+|---|---|
+| `archive.org` returns 503 from anywhere | global outage — wait it out, fix nothing |
+| works elsewhere, fails only on your connection | your IP is rate-limited — see below |
+| works everywhere, fails for one date | genuinely a bad recording / a real bug |
+
+Archive.org **cannot "ban the site"**: there is no server, account or API key of
+ours for them to cut off. Requests come from each visitor's own IP. Per-IP rate
+limiting is the only block that realistically applies, and it is temporary
+(usually hours). Confirm it in ten seconds by loading the site over cellular
+instead of wifi — a different IP that works proves it.
+
+Running `audit_shows.py` or `build_shows.py --refresh` is how you earn one, since
+they make thousands of requests. `audit_shows.py` now rate-limits itself (4
+workers, 0.25s between requests, backoff on 429/503) and refuses `--fix` when
+failures look like throttling — pruning a throttled run deletes good shows from
+`shows.json`. Don't raise `--workers` to "speed it up"; use `--limit` to
+spot-check instead.
+
+### Other
+
 - Cloudflare rewrites the served HTML on the fly (it obfuscates the `mailto:`
   email and injects an `email-decode` script). Do **not** copy the *served* HTML
   back into the repo verbatim — you'd bake in Cloudflare artifacts. Edit the
   source here.
+- **Every branch gets a Cloudflare preview URL** (`https://<branch>.gratefuldead.pages.dev`),
+  posted by the Pages bot on the PR. Test changes there on a real phone before
+  merging to `main` — much better than shipping to production to find out.
 - Archive.org occasionally rate-limits or times out; all fetches use
   `fetchWithTimeout` and degrade gracefully.

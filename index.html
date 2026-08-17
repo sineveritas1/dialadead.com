@@ -1188,7 +1188,16 @@ async function engage(){
 const OFFLINE_MSG='☠ ARCHIVE.ORG IS OFFLINE<br><span style="font-size:9px">'
   +'THE INTERNET ARCHIVE IS DOWN RIGHT NOW — NOT THIS SITE.<br>'
   +'EVERY SHOW STREAMS FROM THEM. TRY AGAIN LATER.</span>';
+const UNREACHABLE_MSG='☠ CAN\'T REACH ARCHIVE.ORG<br><span style="font-size:9px">'
+  +'ARCHIVE.ORG MAY BE DOWN, OR YOUR CONNECTION DROPPED.<br>'
+  +'EVERY SHOW STREAMS FROM THEM. TRY AGAIN IN A BIT.</span>';
 const isOffline=e=>e&&e.status===503;
+// No HTTP status at all means the request never completed — refused, timed out
+// or aborted. During a bad archive.org outage the 503 page stops being served
+// and connections are simply refused, so this is the same event as isOffline()
+// from the listener's side. Either way it is not this recording's fault, which
+// is what the old message claimed.
+const isUnreachable=e=>e&&e.status===undefined;
 async function fetchMeta(identifier,gen,tries=3){
   for(let i=0;;i++){
     if(gen!==loadGen) return null;
@@ -1263,7 +1272,9 @@ async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen,skipSources
       if(await loadAltRecording(identifier,m,d,y,gen)) return;
       if(gen!==loadGen) return;
     }
-    setStatus('err','☠ COULDN\'T LOAD THIS RECORDING<br><span style="font-size:9px">ARCHIVE.ORG MAY BE BUSY — TRY AGAIN OR PICK ANOTHER SOURCE</span>');
+    // Only blame the recording when archive.org actually answered about it.
+    setStatus('err',isUnreachable(e)?UNREACHABLE_MSG
+      :'☠ COULDN\'T LOAD THIS RECORDING<br><span style="font-size:9px">ARCHIVE.ORG MAY BE BUSY — TRY AGAIN OR PICK ANOTHER SOURCE</span>');
   }
 }
 

@@ -305,9 +305,12 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
 /* Both arrows are the SAME glyph, NEXT just rotated. Orbitron has neither ←
    nor →, so each fell back to whatever font on the device happened to carry it
    — two different fonts, two different glyph heights, and NEXT sat higher than
-   PREV. One glyph cannot disagree with itself. */
+   PREV. One glyph cannot disagree with itself.
+   Mirror with scaleX, NOT rotate(180deg): a rotation flips vertically as well,
+   so the glyph lands at its mirrored height inside the line box and NEXT rides
+   high again — the very thing this is here to prevent. */
 .nav-arrow{display:block;line-height:1;}
-.nav-arrow.next{transform:rotate(180deg);}
+.nav-arrow.next{transform:scaleX(-1);}
 .nav-label{
   font-family:'Share Tech Mono',monospace;
   font-size:clamp(8px,2.4vw,10px);letter-spacing:2px;
@@ -464,7 +467,10 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
   transition:all .12s;border:1px solid transparent;
   animation:trackslide .15s ease forwards;
 }
-.track-item:hover{background:#FF149312;border-color:#FF149333;}
+/* Touch devices keep :hover applied after a tap until you touch something
+   else, so a tapped row or card holds its pink highlight and reads as a
+   stray mark rather than feedback. Hover styling is for real pointers. */
+@media (hover:hover){.track-item:hover{background:#FF149312;border-color:#FF149333;}}
 .track-item.active{background:#FF14931a;border-color:#FF149355;}
 .track-num{font-size:clamp(10px,2.8vw,12px);color:#666;min-width:22px;text-align:right;flex-shrink:0;}
 .track-item.active .track-num{color:#FF1493;}
@@ -474,20 +480,20 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
 .track-dur{font-size:clamp(10px,2.8vw,12px);color:#666;flex-shrink:0;}
 .track-item.active .track-dur{color:#FF149388;}
 .track-dl{font-size:clamp(11px,3vw,13px);color:#444;flex-shrink:0;background:none;border:none;cursor:pointer;padding:0 2px;line-height:1;transition:color .12s;}
-.track-item:hover .track-dl{color:#888;}
+@media (hover:hover){.track-item:hover .track-dl{color:#888;}}
 .track-item.active .track-dl{color:#FF149366;}
 .track-dl.loading{opacity:.4;cursor:wait;}
 /* Sits in the existing row next to DL, so rows keep their height and the page
    keeps its length. Same glyph as SHARE THIS SHOW, so it reads as "share". */
 .track-sh{font-size:clamp(12px,3.2vw,14px);color:#444;flex-shrink:0;background:none;border:none;
   cursor:pointer;padding:0 1px 0 3px;line-height:1;transition:color .12s;}
-.track-item:hover .track-sh{color:#888;}
+@media (hover:hover){.track-item:hover .track-sh{color:#888;}}
 .track-item.active .track-sh{color:#FF149366;}
 html.purist .track-dl{color:#ccc;}
 html.purist .track-sh{color:#ccc;}
-html.purist .track-item:hover .track-sh{color:#888;}
+@media (hover:hover){html.purist .track-item:hover .track-sh{color:#888;}}
 html.purist .track-item.active .track-sh{color:#CC000066;}
-html.purist .track-item:hover .track-dl{color:#888;}
+@media (hover:hover){html.purist .track-item:hover .track-dl{color:#888;}}
 html.purist .track-item.active .track-dl{color:#CC000066;}
 
 /* ── ARCHIVE ── */
@@ -502,7 +508,7 @@ html.purist .track-item.active .track-dl{color:#CC000066;}
   margin-bottom:0;
   transition:border-color .2s;
 }
-.archive-toggle:hover{border-color:#39FF1444;}
+@media (hover:hover){.archive-toggle:hover{border-color:#39FF1444;}}
 .archive-toggle-label{font-size:clamp(9px,2.7vw,11px);letter-spacing:3px;color:#39FF14;text-shadow:0 0 8px #39FF1466;}
 .archive-right{display:flex;align-items:center;gap:10px;}
 .archive-badge{font-size:clamp(9px,2.7vw,11px);color:#39FF14cc;letter-spacing:1px;}
@@ -525,7 +531,7 @@ html.purist .track-item.active .track-dl{color:#CC000066;}
   cursor:pointer;background:transparent;color:#888;
   transition:all .12s;
 }
-.ytab:hover{border-color:#FF149355;color:#FF1493;}
+@media (hover:hover){.ytab:hover{border-color:#FF149355;color:#FF1493;}}
 .ytab.active{background:#FF149322;border-color:#FF149388;color:#FF1493;}
 .ytab.all.active{background:#39FF1415;border-color:#39FF1477;color:#39FF14;}
 
@@ -558,7 +564,7 @@ html.purist .track-item.active .track-dl{color:#CC000066;}
   min-width:0;overflow:hidden;
 }
 .show-item>*{min-width:0;}
-.show-item:hover{border-color:#FF149355;background:#FF149308;}
+@media (hover:hover){.show-item:hover{border-color:#FF149355;background:#FF149308;}}
 .show-item:active{background:#FF149315;}
 .show-date{font-family:'Orbitron',monospace;font-size:clamp(10px,2.9vw,12px);font-weight:700;color:#FF1493;letter-spacing:1px;}
 .show-venue{font-size:clamp(9px,2.7vw,11px);color:#00BFFFcc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -748,7 +754,7 @@ html.purist .track-count{color:#003087 !important;}
 html.purist .tracklist{scrollbar-color:#CC000033 #eeeeee;}
 html.purist .tracklist::-webkit-scrollbar-track{background:#eeeeee;}
 html.purist .tracklist::-webkit-scrollbar-thumb{background:#CC000055;border-radius:2px;}
-html.purist .track-item:hover{background:#CC000010;border-color:#CC000033;}
+@media (hover:hover){html.purist .track-item:hover{background:#CC000010;border-color:#CC000033;}}
 html.purist .track-item.active{background:#CC000018;border-color:#CC000055;}
 html.purist .track-num{color:#888888 !important;}
 html.purist .track-item.active .track-num{color:#CC0000 !important;}
@@ -760,13 +766,13 @@ html.purist .track-item.active .track-dur{color:#CC000088 !important;}
 
 /* Archive */
 html.purist .archive-toggle{background:#f7f7f7;border-color:#cccccc;}
-html.purist .archive-toggle:hover{border-color:#003087;}
+@media (hover:hover){html.purist .archive-toggle:hover{border-color:#003087;}}
 html.purist .archive-toggle-label{color:#003087;text-shadow:none;}
 html.purist .archive-badge{color:#003087 !important;}
 html.purist .toggle-arrow{color:#003087;}
 html.purist .archive-body{background:#f7f7f7;border-color:#cccccc;}
 html.purist .ytab{color:#555555;border-color:#cccccc;background:transparent;}
-html.purist .ytab:hover{border-color:#CC000055;color:#CC0000;}
+@media (hover:hover){html.purist .ytab:hover{border-color:#CC000055;color:#CC0000;}}
 html.purist .ytab.active{background:#CC000015;border-color:#CC000088;color:#CC0000;}
 html.purist .ytab.all.active{background:#00308715;border-color:#00308788;color:#003087;}
 html.purist .show-search{background:#ffffff;border-color:#cccccc;color:#000000;caret-color:#CC0000;}
@@ -776,7 +782,7 @@ html.purist .show-grid{scrollbar-color:#CC000033 #eeeeee;}
 html.purist .show-grid::-webkit-scrollbar-track{background:#eeeeee;}
 html.purist .show-grid::-webkit-scrollbar-thumb{background:#CC000044;border-radius:2px;}
 html.purist .show-item{background:#ffffff;border-color:#dddddd;}
-html.purist .show-item:hover{border-color:#CC000055;background:#CC000008;}
+@media (hover:hover){html.purist .show-item:hover{border-color:#CC000055;background:#CC000008;}}
 html.purist .show-item:active{background:#CC000015;}
 html.purist .show-date{color:#CC0000;}
 html.purist .show-venue{color:#555555 !important;}

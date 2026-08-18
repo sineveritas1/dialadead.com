@@ -23,7 +23,9 @@ repo root.
 | `manifest.json`  | PWA manifest (installable app, theme color, icon). |
 | `robots.txt` / `sitemap.xml` | SEO. Both point at `https://dialadead.com/`. |
 | `_redirects`     | Cloudflare Pages redirect rules (currently maps `/favicon.ico` to the Cloudinary logo). |
+| `songs.json`     | Song-title index: `{ "d": [dates...], "s": { "Althea": "1f,2a,..." } }` — values are base36 offsets into `d`. Powers **search by song**. Fetched lazily, only on the first archive search. |
 | `build_shows.py`  | **Regenerates `shows.json`** from Archive.org. See below. Not part of the served site. |
+| `build_songs.py` | **Regenerates `songs.json`.** One metadata request per show (~2,000), so it is rate-limited to 4 workers / 0.25s and takes ~10 minutes. Not part of the served site. |
 | `audit_shows.py` | Maintenance script: checks every `shows.json` entry against Archive.org for dead links / missing MP3s. `python3 audit_shows.py` to report, `--fix` to prune bad shows. Not part of the served site. |
 | `Skull.png`      | Fallback icon / social image (the live logo is served from Cloudinary). |
 | `README.md`      | Public-facing blurb. |
@@ -56,6 +58,28 @@ repo root.
 - **Extras**: favorites (localStorage, max 6), prev/next-show nav, whole-show
   ZIP download (JSZip, lazy-loaded), single-track download, and a black-and-white
   "PURIST" theme toggle.
+
+## Searching by song — `songs.json` / `build_songs.py`
+
+`shows.json` holds no track data, so song search needs a second index. Archive.org's
+scrape API returns item-level fields only, so the tracklist of each show costs one
+`metadata` request — ~2,000 of them. `build_songs.py` does that at the same polite
+pacing as `audit_shows.py` (4 workers, 0.25s apart, backoff on 429/503) and takes
+about ten minutes. **Don't raise the concurrency** — see the rate-limit note below.
+
+```bash
+python3 build_songs.py --limit 20   # spot-check
+python3 build_songs.py              # full rebuild (~10 min)
+```
+
+It reuses `cleanName()` (ported to Python) so indexed titles match what the setlist
+displays, splits segues (`Scarlet > Fire` indexes both), drops non-songs (tuning,
+crowd, banter) and songs appearing only once — those are nearly all junk titles.
+Dates are stored as base36 offsets into a shared date list, which keeps ~36k
+song/show pairs down to ~158 KB for 660 songs.
+
+The browser fetches it **only on the first search**, so it costs nothing on a normal
+visit, and if the fetch fails, search silently falls back to venue/city/date.
 
 ## Regenerating `shows.json` — `build_shows.py`
 

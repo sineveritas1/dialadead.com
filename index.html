@@ -302,6 +302,12 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
 }
 .show-nav-btn:hover{color:#FF1493;-webkit-text-stroke:1.5px #FF1493;}
 .show-nav-btn:hover .nav-label{color:#FF1493;}
+/* Both arrows are the SAME glyph, NEXT just rotated. Orbitron has neither ←
+   nor →, so each fell back to whatever font on the device happened to carry it
+   — two different fonts, two different glyph heights, and NEXT sat higher than
+   PREV. One glyph cannot disagree with itself. */
+.nav-arrow{display:block;line-height:1;}
+.nav-arrow.next{transform:rotate(180deg);}
 .nav-label{
   font-family:'Share Tech Mono',monospace;
   font-size:8px;letter-spacing:2px;
@@ -471,7 +477,16 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
 .track-item:hover .track-dl{color:#888;}
 .track-item.active .track-dl{color:#FF149366;}
 .track-dl.loading{opacity:.4;cursor:wait;}
+/* Sits in the existing row next to DL, so rows keep their height and the page
+   keeps its length. Same glyph as SHARE THIS SHOW, so it reads as "share". */
+.track-sh{font-size:12px;color:#444;flex-shrink:0;background:none;border:none;
+  cursor:pointer;padding:0 1px 0 3px;line-height:1;transition:color .12s;}
+.track-item:hover .track-sh{color:#888;}
+.track-item.active .track-sh{color:#FF149366;}
 html.purist .track-dl{color:#ccc;}
+html.purist .track-sh{color:#ccc;}
+html.purist .track-item:hover .track-sh{color:#888;}
+html.purist .track-item.active .track-sh{color:#CC000066;}
 html.purist .track-item:hover .track-dl{color:#888;}
 html.purist .track-item.active .track-dl{color:#CC000066;}
 
@@ -922,8 +937,8 @@ html.purist .source-select option{background:#fff;color:#003087;}
     <div class="show-date-row">
       <div class="show-date-big" id="show-date-big"></div>
       <div class="show-nav-arrows">
-        <button class="show-nav-btn" onclick="prevShow();this.blur()">←<span class="nav-label">PREV</span></button>
-        <button class="show-nav-btn" onclick="nextShow();this.blur()">→<span class="nav-label">NEXT</span></button>
+        <button class="show-nav-btn" onclick="prevShow();this.blur()"><span class="nav-arrow">←</span><span class="nav-label">PREV</span></button>
+        <button class="show-nav-btn" onclick="nextShow();this.blur()"><span class="nav-arrow next">←</span><span class="nav-label">NEXT</span></button>
         <div style="display:flex;flex-direction:column;align-items:stretch;">
           <button class="show-dl-btn" id="show-dl-btn" onclick="dlShow(this)">⬇ DL SHOW</button>
           <div class="show-dl-progress" id="show-dl-progress"><div class="show-dl-progress-fill" id="show-dl-fill"></div></div>
@@ -1149,7 +1164,12 @@ async function engage(){
   setTimeout(()=>document.getElementById('ebtn').style.animation='',450);
   document.getElementById('player-panel').classList.remove('visible');
   setStatus('',`<span class="loading">⟳</span> SCANNING FOR ${ms}/${ds}/${y}...`);
-  if(SHOW_MAP[key]){const s=SHOW_MAP[key];await loadShow(s.id,m,d,y,s.venue,s.city,s.type,gen);return;}
+  if(SHOW_MAP[key]){
+    const s=SHOW_MAP[key];
+    const alt=pendingSrc; pendingSrc=null;   // one-shot: only the arriving link
+    await loadShow(alt||s.id,m,d,y,s.venue,s.city,alt?sourceType(alt):s.type,gen);
+    return;
+  }
   const ctrl=new AbortController();
   const tid=setTimeout(()=>ctrl.abort(),12000);
   try{
@@ -1256,11 +1276,16 @@ async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen,skipSources
     document.getElementById('track-count').textContent=`${mp3s.length} TRACKS`;
     setShowSeo(currentShow,m,d,y,mp3s.length,isSbd);
     tracks=mp3s.map((f,i)=>{const n=cleanName(f.title||f.name);return{name:n==='—'?`TRACK ${String(i+1).padStart(2,'0')}`:n,url:`https://archive.org/download/${identifier}/${encodeURIComponent(f.name)}`,duration:f.length||0};});
-    currentTrack=0;
+    // A shared song link lands on that song. Clamp it — a different recording
+    // of the same night can be a different length, and a stale link shouldn't
+    // fail, it should just start at the top.
+    let start=0;
+    if(pendingTrack!=null){start=Math.min(pendingTrack-1,mp3s.length-1);pendingTrack=null;}
+    currentTrack=start;
     buildTracklist();
     document.getElementById('player-panel').classList.add('visible');
     document.getElementById('status-panel').style.display='none';
-    playTrack(0);
+    playTrack(start);
     if(!skipSources) loadSources(y,m,d,identifier,gen);
   }catch(e){
     if(gen!==loadGen) return;
@@ -1440,6 +1465,7 @@ function buildTracklist(){
       <div class="track-name">${escHtml(t.name)}</div>
       <div class="track-dur">${formatTime(t.duration)}</div>
       <button class="track-dl" title="Download" onclick="event.stopPropagation();dlTrack(${i},this)">DL</button>
+      <button class="track-sh" title="Share this song" aria-label="Share this song" onclick="event.stopPropagation();shareTrack(${i})">⤴</button>
     </div>`).join('');
 }
 async function fetchWithTimeout(url,ms=25000,opts={},extSignal=null){
@@ -1975,12 +2001,26 @@ function shareShow(){
     if(!m||!d||!y) return;
     date=`${y}-${String(parseInt(m)).padStart(2,'0')}-${String(parseInt(d)).padStart(2,'0')}`;
   }
-  const url=`${window.location.origin}${window.location.pathname}?date=${date}`;
-  navigator.clipboard.writeText(url).then(()=>{
+  copyLink(`${window.location.origin}${window.location.pathname}?date=${date}`,'LINK COPIED!');
+}
+function copyLink(url,msg){
+  const done=()=>{
     const t=document.getElementById('share-toast');
+    t.textContent=msg;
     t.classList.add('show');
     setTimeout(()=>t.classList.remove('show'),2500);
-  }).catch(()=>{ prompt('Copy this link:',url); });
+  };
+  navigator.clipboard.writeText(url).then(done).catch(()=>{ prompt('Copy this link:',url); });
+}
+// Share one song. The link carries the recording too, not just the date — a
+// track number only means anything against the recording it was counted in,
+// and the listener may have switched away from the indexed one.
+function shareTrack(i){
+  const date=currentShow&&currentShow.date;
+  if(!date||!tracks[i]) return;
+  const src=currentShow.identifier?`&src=${encodeURIComponent(currentShow.identifier)}`:'';
+  copyLink(`${window.location.origin}${window.location.pathname}?date=${date}&track=${i+1}${src}`,
+           '♪ SONG LINK COPIED');
 }
 
 // ── Per-show page metadata ────────────────────────────────────────────────────
@@ -2030,10 +2070,14 @@ function setShowSeo(show,m,d,y,trackCount,isSbd){
   try{history.replaceState(null,'',`?date=${show.date}`);}catch(e){}
 }
 
+let pendingTrack=null, pendingSrc=null;
 function checkUrlDate(){
   const params=new URLSearchParams(window.location.search);
   const date=params.get('date');
   if(!date) return false;
+  const t=parseInt(params.get('track'),10);
+  pendingTrack=(t>0)?t:null;
+  pendingSrc=params.get('src')||null;
   const parts=date.split('-');
   if(parts.length!==3) return false;
   const[y,m,d]=parts.map(Number);

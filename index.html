@@ -305,12 +305,15 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
 /* Both arrows are the SAME glyph, NEXT just rotated. Orbitron has neither ←
    nor →, so each fell back to whatever font on the device happened to carry it
    — two different fonts, two different glyph heights, and NEXT sat higher than
-   PREV. One glyph cannot disagree with itself. */
+   PREV. One glyph cannot disagree with itself.
+   Mirror with scaleX, NOT rotate(180deg): a rotation flips vertically as well,
+   so the glyph lands at its mirrored height inside the line box and NEXT rides
+   high again — the very thing this is here to prevent. */
 .nav-arrow{display:block;line-height:1;}
-.nav-arrow.next{transform:rotate(180deg);}
+.nav-arrow.next{transform:scaleX(-1);}
 .nav-label{
   font-family:'Share Tech Mono',monospace;
-  font-size:8px;letter-spacing:2px;
+  font-size:clamp(8px,2.4vw,10px);letter-spacing:2px;
   color:#FF149366;
   -webkit-text-stroke:0;
   line-height:1;transition:color .15s;
@@ -446,8 +449,8 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
   display:flex;align-items:center;justify-content:space-between;
   margin-bottom:8px;
 }
-.tracklist-label{font-size:9px;color:#00BFFFaa;letter-spacing:3px;}
-.track-count{font-size:9px;color:#39FF14cc;letter-spacing:1px;}
+.tracklist-label{font-size:clamp(9px,2.6vw,11px);color:#00BFFFaa;letter-spacing:3px;}
+.track-count{font-size:clamp(9px,2.6vw,11px);color:#39FF14cc;letter-spacing:1px;}
 
 .tracklist{
   max-height:clamp(160px,30vh,220px);overflow-y:auto;
@@ -464,30 +467,33 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
   transition:all .12s;border:1px solid transparent;
   animation:trackslide .15s ease forwards;
 }
-.track-item:hover{background:#FF149312;border-color:#FF149333;}
+/* Touch devices keep :hover applied after a tap until you touch something
+   else, so a tapped row or card holds its pink highlight and reads as a
+   stray mark rather than feedback. Hover styling is for real pointers. */
+@media (hover:hover){.track-item:hover{background:#FF149312;border-color:#FF149333;}}
 .track-item.active{background:#FF14931a;border-color:#FF149355;}
-.track-num{font-size:10px;color:#666;min-width:22px;text-align:right;flex-shrink:0;}
+.track-num{font-size:clamp(10px,2.8vw,12px);color:#666;min-width:22px;text-align:right;flex-shrink:0;}
 .track-item.active .track-num{color:#FF1493;}
-.track-icon{font-size:10px;color:#39FF14;width:12px;flex-shrink:0;text-shadow:0 0 6px #39FF14;}
-.track-name{font-size:12px;color:#ddd;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0.3px;}
+.track-icon{font-size:clamp(10px,2.8vw,12px);color:#39FF14;width:12px;flex-shrink:0;text-shadow:0 0 6px #39FF14;}
+.track-name{font-size:clamp(12px,3.4vw,14px);color:#ddd;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0.3px;}
 .track-item.active .track-name{color:#FF1493;text-shadow:0 0 6px #FF149344;}
-.track-dur{font-size:10px;color:#666;flex-shrink:0;}
+.track-dur{font-size:clamp(10px,2.8vw,12px);color:#666;flex-shrink:0;}
 .track-item.active .track-dur{color:#FF149388;}
-.track-dl{font-size:11px;color:#444;flex-shrink:0;background:none;border:none;cursor:pointer;padding:0 2px;line-height:1;transition:color .12s;}
-.track-item:hover .track-dl{color:#888;}
+.track-dl{font-size:clamp(11px,3vw,13px);color:#444;flex-shrink:0;background:none;border:none;cursor:pointer;padding:0 2px;line-height:1;transition:color .12s;}
+@media (hover:hover){.track-item:hover .track-dl{color:#888;}}
 .track-item.active .track-dl{color:#FF149366;}
 .track-dl.loading{opacity:.4;cursor:wait;}
 /* Sits in the existing row next to DL, so rows keep their height and the page
    keeps its length. Same glyph as SHARE THIS SHOW, so it reads as "share". */
-.track-sh{font-size:12px;color:#444;flex-shrink:0;background:none;border:none;
+.track-sh{font-size:clamp(12px,3.2vw,14px);color:#444;flex-shrink:0;background:none;border:none;
   cursor:pointer;padding:0 1px 0 3px;line-height:1;transition:color .12s;}
-.track-item:hover .track-sh{color:#888;}
+@media (hover:hover){.track-item:hover .track-sh{color:#888;}}
 .track-item.active .track-sh{color:#FF149366;}
 html.purist .track-dl{color:#ccc;}
 html.purist .track-sh{color:#ccc;}
-html.purist .track-item:hover .track-sh{color:#888;}
+@media (hover:hover){html.purist .track-item:hover .track-sh{color:#888;}}
 html.purist .track-item.active .track-sh{color:#CC000066;}
-html.purist .track-item:hover .track-dl{color:#888;}
+@media (hover:hover){html.purist .track-item:hover .track-dl{color:#888;}}
 html.purist .track-item.active .track-dl{color:#CC000066;}
 
 /* ── ARCHIVE ── */
@@ -502,10 +508,10 @@ html.purist .track-item.active .track-dl{color:#CC000066;}
   margin-bottom:0;
   transition:border-color .2s;
 }
-.archive-toggle:hover{border-color:#39FF1444;}
-.archive-toggle-label{font-size:9px;letter-spacing:3px;color:#39FF14;text-shadow:0 0 8px #39FF1466;}
+@media (hover:hover){.archive-toggle:hover{border-color:#39FF1444;}}
+.archive-toggle-label{font-size:clamp(9px,2.7vw,11px);letter-spacing:3px;color:#39FF14;text-shadow:0 0 8px #39FF1466;}
 .archive-right{display:flex;align-items:center;gap:10px;}
-.archive-badge{font-size:9px;color:#39FF14cc;letter-spacing:1px;}
+.archive-badge{font-size:clamp(9px,2.7vw,11px);color:#39FF14cc;letter-spacing:1px;}
 .toggle-arrow{font-size:11px;color:#39FF14;transition:transform .25s;}
 .toggle-arrow.open{transform:rotate(180deg);}
 
@@ -516,16 +522,16 @@ html.purist .track-item.active .track-dl{color:#CC000066;}
 }
 .archive-body.open{display:block;}
 
-.year-tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;}
+.year-tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:10px;}
 .ytab{
-  font-family:'Share Tech Mono',monospace;font-size:10px;
+  font-family:'Share Tech Mono',monospace;font-size:clamp(10px,3vw,12px);
   letter-spacing:1px;padding:4px 0;
-  width:44px;text-align:center;
+  width:auto;min-width:0;text-align:center;
   border:1px solid #2a2a2a;border-radius:4px;
   cursor:pointer;background:transparent;color:#888;
   transition:all .12s;
 }
-.ytab:hover{border-color:#FF149355;color:#FF1493;}
+@media (hover:hover){.ytab:hover{border-color:#FF149355;color:#FF1493;}}
 .ytab.active{background:#FF149322;border-color:#FF149388;color:#FF1493;}
 .ytab.all.active{background:#39FF1415;border-color:#39FF1477;color:#39FF14;}
 
@@ -542,6 +548,7 @@ html.purist .track-item.active .track-dl{color:#CC000066;}
 .show-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
+  overflow-x:hidden;
   gap:5px;
   max-height:clamp(200px,35vh,260px);overflow-y:auto;
   scrollbar-width:thin;scrollbar-color:#FF149333 #000;
@@ -554,13 +561,18 @@ html.purist .track-item.active .track-dl{color:#CC000066;}
   background:#000;border:1px solid #1a1a1a;border-radius:6px;
   padding:clamp(6px,2vw,8px) clamp(7px,2vw,9px);cursor:pointer;transition:all .15s;
   display:flex;flex-direction:column;gap:3px;
+  min-width:0;overflow:hidden;
 }
-.show-item:hover{border-color:#FF149355;background:#FF149308;}
+.show-item>*{min-width:0;}
+@media (hover:hover){.show-item:hover{border-color:#FF149355;background:#FF149308;}}
 .show-item:active{background:#FF149315;}
-.show-date{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;color:#FF1493;letter-spacing:1px;}
-.show-venue{font-size:9px;color:#00BFFFcc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.show-city{font-size:9px;color:#39FF14aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.show-src{font-size:8px;letter-spacing:1px;margin-top:1px;}
+.show-date{font-family:'Orbitron',monospace;font-size:clamp(10px,2.9vw,12px);font-weight:700;color:#FF1493;letter-spacing:1px;}
+.show-venue{font-size:clamp(9px,2.7vw,11px);color:#00BFFFcc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.show-city{font-size:clamp(9px,2.7vw,11px);color:#39FF14aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.show-src{font-size:clamp(8px,2.4vw,10px);letter-spacing:1px;margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.show-song{color:#FF1493cc;}
+html.purist .show-song{color:#CC0000cc;}
 .show-src.sbd{color:#39FF14cc;}
 .show-src.aud{color:#00BFFF88;}
 
@@ -742,7 +754,7 @@ html.purist .track-count{color:#003087 !important;}
 html.purist .tracklist{scrollbar-color:#CC000033 #eeeeee;}
 html.purist .tracklist::-webkit-scrollbar-track{background:#eeeeee;}
 html.purist .tracklist::-webkit-scrollbar-thumb{background:#CC000055;border-radius:2px;}
-html.purist .track-item:hover{background:#CC000010;border-color:#CC000033;}
+@media (hover:hover){html.purist .track-item:hover{background:#CC000010;border-color:#CC000033;}}
 html.purist .track-item.active{background:#CC000018;border-color:#CC000055;}
 html.purist .track-num{color:#888888 !important;}
 html.purist .track-item.active .track-num{color:#CC0000 !important;}
@@ -754,13 +766,13 @@ html.purist .track-item.active .track-dur{color:#CC000088 !important;}
 
 /* Archive */
 html.purist .archive-toggle{background:#f7f7f7;border-color:#cccccc;}
-html.purist .archive-toggle:hover{border-color:#003087;}
+@media (hover:hover){html.purist .archive-toggle:hover{border-color:#003087;}}
 html.purist .archive-toggle-label{color:#003087;text-shadow:none;}
 html.purist .archive-badge{color:#003087 !important;}
 html.purist .toggle-arrow{color:#003087;}
 html.purist .archive-body{background:#f7f7f7;border-color:#cccccc;}
 html.purist .ytab{color:#555555;border-color:#cccccc;background:transparent;}
-html.purist .ytab:hover{border-color:#CC000055;color:#CC0000;}
+@media (hover:hover){html.purist .ytab:hover{border-color:#CC000055;color:#CC0000;}}
 html.purist .ytab.active{background:#CC000015;border-color:#CC000088;color:#CC0000;}
 html.purist .ytab.all.active{background:#00308715;border-color:#00308788;color:#003087;}
 html.purist .show-search{background:#ffffff;border-color:#cccccc;color:#000000;caret-color:#CC0000;}
@@ -770,7 +782,7 @@ html.purist .show-grid{scrollbar-color:#CC000033 #eeeeee;}
 html.purist .show-grid::-webkit-scrollbar-track{background:#eeeeee;}
 html.purist .show-grid::-webkit-scrollbar-thumb{background:#CC000044;border-radius:2px;}
 html.purist .show-item{background:#ffffff;border-color:#dddddd;}
-html.purist .show-item:hover{border-color:#CC000055;background:#CC000008;}
+@media (hover:hover){html.purist .show-item:hover{border-color:#CC000055;background:#CC000008;}}
 html.purist .show-item:active{background:#CC000015;}
 html.purist .show-date{color:#CC0000;}
 html.purist .show-venue{color:#555555 !important;}
@@ -998,7 +1010,7 @@ html.purist .source-select option{background:#fff;color:#003087;}
   <div class="archive-body" id="archive-body">
     <div class="year-tabs" id="year-tabs"></div>
     <input class="show-search" id="show-search"
-      placeholder="SEARCH VENUE, CITY, DATE..." oninput="filterShows()">
+      placeholder="SEARCH SONG, VENUE, CITY, DATE..." oninput="filterShows()">
     <div class="show-grid" id="show-grid">
       <div class="no-shows">⟳ LOADING...</div>
     </div>
@@ -1081,25 +1093,59 @@ function setYear(y){
 }
 
 // ── Filter + render ───────────────────────────────────────────────────────────
+// ── Song search ───────────────────────────────────────────────────────────────
+// shows.json carries no track data, so searching by song needs its own index.
+// songs.json (built by build_songs.py) maps a song title to the shows that
+// contain it, as base36 offsets into its own date list — that keeps tens of
+// thousands of song/show pairs to a small file. It is fetched on the first
+// search rather than at startup, because most visits never search at all.
+let SONG_IDX=null, songIdxState='idle';
+function loadSongIndex(){
+  if(songIdxState!=='idle') return;
+  songIdxState='loading';
+  fetchWithTimeout('songs.json',15000).then(r=>r.json()).then(j=>{
+    const dates=j.d||[], out={};
+    for(const name in (j.s||{}))
+      out[name]=String(j.s[name]||'').split(',').map(x=>dates[parseInt(x,36)]).filter(Boolean);
+    SONG_IDX=out; songIdxState='ready';
+    filterShows();          // re-run against whatever is already typed
+  }).catch(()=>{songIdxState='failed';});   // search quietly stays venue/city/date
+}
+// date -> the song title that matched, so the card can say why it is in the list
+function songMatches(q){
+  const hits=new Map();
+  if(!SONG_IDX) return hits;
+  for(const name in SONG_IDX){
+    if(name.toLowerCase().includes(q))
+      for(const d of SONG_IDX[name]) if(!hits.has(d)) hits.set(d,name);
+  }
+  return hits;
+}
 function filterShows(){
   if(!ALL_SHOWS.length) return;
   const q=(document.getElementById('show-search').value||'').toLowerCase().trim();
   let list=ALL_SHOWS;
   if(activeYear!=='all') list=list.filter(s=>s.date.startsWith(activeYear));
-  if(q) list=list.filter(s=>s.date.includes(q)||(s.venue||'').toLowerCase().includes(q)||(s.city||'').toLowerCase().includes(q));
-  renderShows(list);
+  let hits=new Map();
+  if(q){
+    if(q.length>=2){loadSongIndex();hits=songMatches(q);}
+    list=list.filter(s=>s.date.includes(q)||(s.venue||'').toLowerCase().includes(q)
+      ||(s.city||'').toLowerCase().includes(q)||hits.has(s.date));
+  }
+  renderShows(list,hits);
 }
-function renderShows(list){
+function renderShows(list,hits){
   const grid=document.getElementById('show-grid');
   if(!list.length){grid.innerHTML='<div class="no-shows">NO SHOWS FOUND</div>';return;}
   grid.innerHTML=list.map(s=>{
     const[y,m,d]=s.date.split('-').map(Number);
     const label=`${MONTHS[m-1]} ${String(d).padStart(2,'0')} ${y}`;
+    const song=hits&&hits.get(s.date);
     return `<div class="show-item" onclick="dialShow('${s.date}')">
       <div class="show-date">${label}</div>
       <div class="show-venue">${escHtml(s.venue||'—')}</div>
       <div class="show-city">${escHtml(s.city||'')}</div>
-      <div class="show-src ${s.type||'aud'}">${(s.type||'aud')==='sbd'?'▸ SBD':'▸ AUD'}${s.partial?' <span class="show-partial">· '+escHtml(String(s.partial).toUpperCase())+'</span>':''}</div>
+      <div class="show-src ${s.type||'aud'}">${(s.type||'aud')==='sbd'?'▸ SBD':'▸ AUD'}${song?' <span class="show-song">· '+escHtml(song.toUpperCase())+'</span>':''}${s.partial?' <span class="show-partial">· '+escHtml(String(s.partial).toUpperCase())+'</span>':''}</div>
     </div>`;
   }).join('');
 }

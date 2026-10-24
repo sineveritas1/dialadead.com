@@ -1,0 +1,9 @@
+# Cloudflare Pages response headers. https://developers.cloudflare.com/pages/configuration/headers/
+#
+# The production deploy is also reachable at gratefuldead.pages.dev — a full
+# duplicate of dialadead.com. Keep it (and branch previews) out of search so
+# Google only ever indexes the real domain.
+https://gratefuldead.pages.dev/*
+  X-Robots-Tag: noindex
+https://:branch.gratefuldead.pages.dev/*
+  X-Robots-Tag: noindex

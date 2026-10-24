@@ -58,6 +58,15 @@ repo root.
   seek handlers. It's also the fix for playback stalling after a track or two
   when the screen is off: an active media session keeps audio focus, and
   `playTrack()` no longer blanks `audio.src` between tracks.
+- **Screen-locked playback — don't regress these.** Browsers run no
+  `requestAnimationFrame` for a locked/hidden page, and iOS holds back timers
+  on a silent one. So playback bookkeeping (`lastPos`, retry budgets, position
+  state) runs directly in `timeupdate`, with rAF only for painting; the first
+  dropout retry fires inside the media event, not on a timer; and the
+  `loadedmetadata` seek a retry registers checks `playGen`/`currentTrack`, or a
+  failed retry drags the *next* song to the old position. Don't register
+  `seekbackward`/`seekforward`: iOS then replaces lock-screen next/prev with
+  ±10s buttons.
 - **Extras**: favorites (localStorage, max 6), prev/next-show nav, whole-show
   ZIP download (JSZip, lazy-loaded), single-track download, and a black-and-white
   "PURIST" theme toggle.
@@ -175,7 +184,7 @@ node --check /tmp/app.js
 
 # 2) load the page in real Chromium and confirm the archive renders
 python3 -m http.server 8199 & SRV=$!; sleep 1
-CHROME=$(ls /opt/pw-browsers/chromium-*/chrome-linux/chrome | head -1)
+CHROME=$(ls /opt/pw-browsers/chromium-*/chrome-linux*/chrome | head -1)
 "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=6000 \
   --dump-dom http://localhost:8199/index.html | grep -oE '[0-9]+ SHOWS'
 kill $SRV

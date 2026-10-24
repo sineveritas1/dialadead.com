@@ -1701,8 +1701,8 @@ function setupMediaSession(){
   set('pause',()=>{audio.pause();});
   set('previoustrack',()=>prevTrack());
   set('nexttrack',()=>nextTrack());
-  set('seekbackward',d=>{audio.currentTime=Math.max(0,audio.currentTime-(d&&d.seekOffset||10));});
-  set('seekforward',d=>{audio.currentTime=Math.min(audio.duration||1e9,audio.currentTime+(d&&d.seekOffset||10));});
+  // No seekbackward/seekforward on purpose: when they're registered, iOS swaps
+  // the lock screen's previous/next track buttons for ±10s skip buttons.
   set('seekto',d=>{if(!d)return;if(d.fastSeek&&'fastSeek'in audio){audio.fastSeek(d.seekTime);}else{audio.currentTime=d.seekTime;}updatePositionState();});
   set('stop',()=>{audio.pause();});
 }
@@ -1761,7 +1761,7 @@ function playTrack(i,auto){
   const p=audio.play();
   if(p) p.catch(e=>{if(gen!==playGen||e.name==='AbortError') return;});
   document.getElementById('play-pause-btn').classList.remove('paused');
-  resumeIdx=-1;resumeTries=0;lastPos=0;   // fresh track, fresh dropout budget
+  resumeIdx=-1;resumeTries=0;lastPos=0;playFrom=0;   // fresh track, fresh dropout budget
   updateActive();
   updateMediaSession();
 }
@@ -1795,22 +1795,32 @@ function nextTrack(){if(currentTrack<tracks.length-1) playTrack(currentTrack+1);
 // after MAX_SKIP dead tracks in a row with nothing playing we stop rather than
 // race to the end of the show and lose the listener's place.
 const MAX_RESUME=3, MAX_SKIP=2;
-let resumeIdx=-1, resumeTries=0, deadSkips=0, lastPos=0;
+// playFrom: where the current stream started playing (0, or the resume point).
+// Budgets are earned back by playing *past* it — not by the song's position, which
+// is already past 0:30 the instant a resume seeks back to 4:00.
+let resumeIdx=-1, resumeTries=0, deadSkips=0, lastPos=0, playFrom=0;
 function resumeCurrent(pos,gen,idx){
   resumeTries++;
-  setTimeout(()=>{
+  const go=()=>{
     if(gen!==playGen||currentTrack!==idx||!tracks[idx]) return;
+    playFrom=pos;
     audio.src=tracks[idx].url;
-    audio.addEventListener('loadedmetadata',function seek(){
-      audio.removeEventListener('loadedmetadata',seek);
+    audio.addEventListener('loadedmetadata',()=>{
+      // The listener outlives a failed reload. By the time it fires the player
+      // may have moved to another track or show — don't drag that one to `pos`.
+      if(gen!==playGen||currentTrack!==idx) return;
       try{if(pos>0&&pos<(audio.duration||Infinity)) audio.currentTime=pos;}catch(e){}
     },{once:true});
     const p=audio.play();
     if(p) p.catch(()=>{});
-    // Space the retries out rather than hammering: archive.org throttles a
-    // client that re-requests hard, and a throttled IP fails everything —
-    // including the metadata fetch, which reads as "nothing loads at all".
-  },800*resumeTries);
+  };
+  // First retry right away, inside the media event: with the screen locked a
+  // timer can be held back until the phone wakes (iOS suspends a silent page),
+  // and most dropouts are a single reset connection that one retry fixes.
+  // Later retries are spaced out rather than hammering: archive.org throttles a
+  // client that re-requests hard, and a throttled IP fails everything —
+  // including the metadata fetch, which reads as "nothing loads at all".
+  if(resumeTries===1) go(); else setTimeout(go,800*(resumeTries-1));
 }
 audio.addEventListener('ended',()=>{
   // Nothing loaded => this 'ended' was queued for a source we already swapped
@@ -1851,7 +1861,19 @@ audio.addEventListener('error',()=>{
 });
 let seeking=false, rafPending=false;
 audio.addEventListener('timeupdate',()=>{
-  if(!audio.duration||seeking||rafPending) return;
+  if(!audio.duration) return;
+  // Bookkeeping runs on every tick. It used to sit inside the
+  // requestAnimationFrame below — and browsers don't run animation frames for a
+  // locked or hidden page, so with the screen off none of this happened.
+  // A stretch of clean playback earns the dropout budget back, so a long track
+  // that hiccups a few times over 20 minutes doesn't run out of retries.
+  if(resumeTries&&audio.currentTime>playFrom+30){resumeIdx=-1;resumeTries=0;}
+  // Likewise, a track that really got going means the connection came back.
+  if(deadSkips&&audio.currentTime>playFrom+10) deadSkips=0;
+  lastPos=audio.currentTime;   // where to pick up if the stream drops
+  updatePositionState();
+  // Painting waits for a frame, so it's skipped (not queued up) while hidden.
+  if(seeking||rafPending) return;
   rafPending=true;
   requestAnimationFrame(()=>{
     rafPending=false;
@@ -1860,14 +1882,17 @@ audio.addEventListener('timeupdate',()=>{
     document.getElementById('progress-fill').style.width=pct;
     document.getElementById('progress-thumb').style.left=pct;
     document.getElementById('time-display').textContent=`${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
-    // A stretch of clean playback earns the dropout budget back, so a long track
-    // that hiccups a few times over 20 minutes doesn't run out of retries.
-    if(resumeTries&&audio.currentTime>30){resumeIdx=-1;resumeTries=0;}
-    // Likewise, a track that really got going means the connection came back.
-    if(deadSkips&&audio.currentTime>10) deadSkips=0;
-    lastPos=audio.currentTime;   // where to pick up if the stream drops
-    updatePositionState();
   });
+});
+// A connection that hangs without erroring — common on cellular — fires
+// 'stalled' and nothing else, leaving the player silent indefinitely. When it
+// has actually run dry mid-track, treat it as a dropout. Not before metadata
+// (that's just a slow start) and not while it still has data to play.
+audio.addEventListener('stalled',()=>{
+  if(audio.paused||audio.readyState===0||audio.readyState>=3||!tracks[currentTrack]) return;
+  const idx=currentTrack;
+  if(idx!==resumeIdx){resumeIdx=idx;resumeTries=0;}
+  if(resumeTries<MAX_RESUME) resumeCurrent(audio.currentTime||lastPos,playGen,idx);
 });
 (function(){
   const wrap=document.getElementById('progress-wrap');

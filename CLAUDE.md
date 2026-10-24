@@ -21,8 +21,11 @@ repo root.
 | `index.html`     | The entire app — HTML, CSS, and JS are all inline. This is where ~all work happens. |
 | `shows.json`     | Index of ~2,075 shows: `{ "YYYY-MM-DD": { id, venue, city, type } }`. One **recommended** recording per date, used for the browsable archive, RANDOM, and the fast path on ENGAGE. |
 | `manifest.json`  | PWA manifest (installable app, theme color, icon). |
-| `robots.txt` / `sitemap.xml` | SEO. Both point at `https://dialadead.com/`. |
-| `_redirects`     | Cloudflare Pages redirect rules (currently maps `/favicon.ico` to the Cloudinary logo). |
+| `robots.txt` / `sitemap.xml` | SEO. `sitemap.xml` is **generated** by `build_pages.py` (homepage + every year + every show). |
+| `show/*.html`, `year/*.html`, `pages.css` | **Generated** static SEO pages — see "Search engines" below. Served at `/show/YYYY-MM-DD` and `/year/YYYY`. Don't hand-edit. |
+| `build_pages.py` | **Regenerates** `show/`, `year/`, `pages.css` and `sitemap.xml` from `shows.json` + `songs.json`. No network. Re-run whenever either JSON changes. |
+| `_redirects`     | Cloudflare Pages redirect rules (maps `/favicon.ico` and `/apple-touch-icon.png` to the Cloudinary logo). |
+| `_headers`       | Cloudflare Pages headers: `X-Robots-Tag: noindex` on `gratefuldead.pages.dev` so the duplicate host stays out of Google. |
 | `songs.json`     | Song-title index: `{ "d": [dates...], "s": { "Althea": "1f,2a,..." } }` — values are base36 offsets into `d`. Powers **search by song**. Fetched lazily, only on the first archive search. |
 | `build_shows.py`  | **Regenerates `shows.json`** from Archive.org. See below. Not part of the served site. |
 | `build_songs.py` | **Regenerates `songs.json`.** One metadata request per show (~2,000), so it is rate-limited to 4 workers / 0.25s and takes ~10 minutes. Not part of the served site. |
@@ -80,6 +83,30 @@ song/show pairs down to ~158 KB for 660 songs.
 
 The browser fetches it **only on the first search**, so it costs nothing on a normal
 visit, and if the fetch fails, search silently falls back to venue/city/date.
+
+## Search engines — `build_pages.py`
+
+The app draws everything with JS, so its raw HTML is close to empty and every
+show lives at a `?date=` URL nothing links to. Google indexed **zero** pages of
+it. The fix is plain HTML that reads without JS:
+
+- `index.html` has a real `<h1>` and a static **about** block (description,
+  links to every `/year/YYYY`, a few legendary `/show/…` nights). Keep it
+  static — don't move it into JS.
+- `build_pages.py` writes one page per show (`show/YYYY-MM-DD.html`: venue,
+  city, recording type, songs A–Z from `songs.json`, prev/next, MusicEvent
+  JSON-LD, a **▶ PLAY THIS SHOW** link to `/?date=…`) and one per year, plus
+  `sitemap.xml`. Cloudflare Pages serves `foo.html` at `/foo`; link without
+  the extension.
+- When the player loads a show that is in `shows.json`, `setShowSeo()` sets the
+  canonical to `/show/<date>`, so the static page is the one that ranks.
+
+```bash
+python3 build_pages.py   # after any change to shows.json or songs.json; commit the output
+```
+
+Locally `python3 -m http.server` doesn't strip `.html`, so open
+`/show/1977-05-08.html` there; on Pages it's `/show/1977-05-08`.
 
 ## Regenerating `shows.json` — `build_shows.py`
 

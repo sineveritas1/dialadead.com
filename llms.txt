@@ -30,6 +30,9 @@ Grateful Dead fans (Deadheads), music historians, jam band enthusiasts, and anyo
 
 Single-page web app, no framework or build step. All audio served from the Internet Archive's public domain collection under the Grateful Dead's taper-friendly policy.
 
-## URL
+## URLs
 
-https://dialadead.com
+- https://dialadead.com — the player
+- https://dialadead.com/year/1977 — every show from a year (1965–1995)
+- https://dialadead.com/show/1977-05-08 — one show: venue, city, recording, songs, play link
+- https://dialadead.com/?date=1977-05-08 — open the player straight to a show

@@ -202,8 +202,10 @@ input.digit::placeholder{color:#FF149333;text-shadow:none;}
   margin-top:10px;
   font-size:9px;
   color:#39FF14cc;
-  letter-spacing:2px;
+  letter-spacing:clamp(.5px,.45vw,2px);
 }
+/* One line wherever it fits; narrower phones wrap rather than overflow. */
+@media (min-width:405px){.dest-hint{white-space:nowrap;}}
 
 /* ── BUTTONS ── */
 .btns{
@@ -946,7 +948,7 @@ html.purist .source-select option{background:#fff;color:#003087;}
         </div>
       </div>
     </div>
-    <div class="dest-hint">TYPE DATE · LEAVE A FIELD BLANK FOR ANY · TAP ENGAGE</div>
+    <div class="dest-hint">TYPE DATE · LEAVE BLANK FOR ANY DATE · TAP ENGAGE</div>
   </div>
 
   <!-- BUTTONS -->
@@ -1055,7 +1057,7 @@ html.purist .source-select option{background:#fff;color:#003087;}
   <a href="mailto:hello@neondeadhead.com" style="color:#00BFFF;text-decoration:none;text-shadow:0 0 10px #00BFFF;">HELLO@NEONDEADHEAD.COM</a><br>
   <a href="tel:+19048782546" style="color:#FF1493;text-decoration:none;text-shadow:0 0 8px #FF149355;">(904) TRUCKIN'</a><br>
   <a href="tel:+19048782546" style="color:#FF1493;text-decoration:none;text-shadow:0 0 8px #FF149355;">(904) 878-2546</a>
-  <div class="disclaimer">Fan-made · not affiliated with Grateful Dead or Grateful Dead Productions · recordings courtesy of the Internet Archive</div>
+  <div class="disclaimer">Fan-made site</div>
 </div>
 </main>
 

@@ -4,7 +4,7 @@
 <link rel="icon" type="image/png" sizes="64x64" href="https://res.cloudinary.com/dmbeoutyi/image/upload/w_64,h_64,c_fill/v1774666557/Untitled_design_16_v575qu.png">
 <link rel="shortcut icon" href="https://res.cloudinary.com/dmbeoutyi/image/upload/w_64,h_64,c_fill/v1774666557/Untitled_design_16_v575qu.png">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DIAL·A·DEAD — Stream Any Grateful Dead Show Free</title>
 <meta name="description" content="Stream any Grateful Dead show from 1965–1995. Enter a date and instantly dial in soundboards and audience recordings from the Archive.org collection. Free. No account needed.">
 <link rel="canonical" href="https://dialadead.com/">
@@ -39,6 +39,8 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"MusicGroup","name":"Grateful Dead","sameAs":["https://archive.org/details/GratefulDead","https://en.wikipedia.org/wiki/Grateful_Dead"]}
 </script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -543,6 +545,9 @@ html.purist .track-item.active .track-dl{color:#CC000066;}
   transition:border-color .2s;
 }
 .show-search::placeholder{color:#00BFFF55;}
+/* iOS zooms the page into any focused field under 16px. Pinch-zoom is allowed
+   now (accessibility), so the old maximum-scale=1 no longer prevents that. */
+@supports (-webkit-touch-callout:none){.show-search,.source-select{font-size:16px;}}
 .show-search:focus{border-color:#00BFFF66;}
 
 .show-grid{
@@ -893,7 +898,7 @@ html.purist .source-select option{background:#fff;color:#003087;}
 </style>
 </head>
 <body>
-<div class="machine">
+<main class="machine">
 <button class="purist-btn" id="purist-btn" onclick="togglePurist()">PURIST</button>
 
   <div class="leds">
@@ -905,8 +910,8 @@ html.purist .source-select option{background:#fff;color:#003087;}
   <!-- HEADER -->
   <div class="header">
     <img class="logo"
-      src="https://res.cloudinary.com/dmbeoutyi/image/upload/v1774666557/Untitled_design_16_v575qu.png"
-      alt="Logo" onerror="this.style.display='none'">
+      src="https://res.cloudinary.com/dmbeoutyi/image/upload/w_128,h_128,c_fill,f_auto,q_auto/v1774666557/Untitled_design_16_v575qu.png"
+      width="64" height="64" alt="DIAL·A·DEAD logo" onerror="this.style.display='none'">
     <h1 class="title"><span class="title-i">D</span><span class="title-i">I</span>AL·A·DEA<span style="letter-spacing:0">D</span></h1>
     <div class="subtitle">GRATEFUL DEAD TIME MACHINE · 1965–1995</div>
   </div>
@@ -1056,7 +1061,7 @@ html.purist .source-select option{background:#fff;color:#003087;}
   <a href="tel:+19048782546" style="color:#FF1493;text-decoration:none;text-shadow:0 0 8px #FF149355;">(904) TRUCKIN'</a><br>
   <a href="tel:+19048782546" style="color:#FF1493;text-decoration:none;text-shadow:0 0 8px #FF149355;">(904) 878-2546</a>
 </div>
-</div>
+</main>
 
 
 <script>

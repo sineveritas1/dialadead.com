@@ -1,38 +1,22 @@
 # Dial-A-Dead
 
-> Stream every Grateful Dead live show from the Internet Archive — free, legal, and complete.
+> Stream every Grateful Dead live show from the Internet Archive — free, legal, and complete. Enter any date from 1965–1995 and that night's concert plays straight from archive.org.
 
-Dial-A-Dead is a web player for the entire Grateful Dead live archive. Users enter any date between 1965 and 1995 and instantly stream that night's show directly from the Internet Archive (archive.org). The site connects Deadheads worldwide through shared music discovery.
+Dial-A-Dead is a web player for the entire Grateful Dead live archive: 2,000+ concert dates drawn from 18,000+ archive.org recordings. Soundboards are preferred over audience tapes, and every recording of a night (soundboard, matrix, audience) is selectable. Features: setlists, random show, today-in-history, saved favourites, previous/next show, and single-track or whole-show downloads. No accounts, no ads. Audio is served by the Internet Archive under the Grateful Dead's taper-friendly policy.
 
-## What it does
+## Pages
 
-- Enter any date (month/day/year) to load that show's full setlist and stream it
-- Covers every known Grateful Dead concert from 1965–1995
-- Prioritizes soundboard (SBD) recordings over audience tapes when available
-- Streams MP3 audio directly from archive.org — no accounts, no cost
-- Every recording of a given night is selectable, not just one — soundboards, matrixes and audience tapes
-- Optional download of a single track or a whole show as a ZIP
-- Includes a full show archive browser with search by year, venue, and city
-- Random show discovery, saved favourites, and previous/next show navigation
+- [Player](https://dialadead.com/): enter a date and stream the show
+- [Open a show in the player](https://dialadead.com/?date=1977-05-08): any date as `?date=YYYY-MM-DD`
+- [Show page](https://dialadead.com/show/1977-05-08): one concert's venue, city, recording type, songs and play link; any date as `/show/YYYY-MM-DD`
+- [Year page](https://dialadead.com/year/1977): every show from one year; any year 1965–1995 as `/year/YYYY`
+- [Sitemap](https://dialadead.com/sitemap.xml): every year and show page
 
-## Content
+## Data
 
-- 2,000+ Grateful Dead live concert dates, drawn from 18,000+ archive.org recordings
-- Soundboard recordings, audience tapes, and matrix recordings
-- Complete sets: Set 1, Set 2, encores
-- Shows span 1965–1995 across hundreds of venues in the US and abroad
+- [Show index](https://dialadead.com/shows.json): JSON of every date with its recommended archive.org recording, venue, city and source type
+- [Grateful Dead collection on archive.org](https://archive.org/details/GratefulDead): the source of all audio
 
-## Who it's for
+## Optional
 
-Grateful Dead fans (Deadheads), music historians, jam band enthusiasts, and anyone who wants to explore one of the greatest live music archives in history.
-
-## Technology
-
-Single-page web app, no framework or build step. All audio served from the Internet Archive's public domain collection under the Grateful Dead's taper-friendly policy.
-
-## URLs
-
-- https://dialadead.com — the player
-- https://dialadead.com/year/1977 — every show from a year (1965–1995)
-- https://dialadead.com/show/1977-05-08 — one show: venue, city, recording, songs, play link
-- https://dialadead.com/?date=1977-05-08 — open the player straight to a show
+- [NeonDeadhead](https://neondeadhead.com): the people behind the site

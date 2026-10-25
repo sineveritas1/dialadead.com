@@ -27,6 +27,7 @@ from collections import defaultdict
 
 SITE = 'https://dialadead.com'
 LOGO = 'https://res.cloudinary.com/dmbeoutyi/image/upload/v1774666557/Untitled_design_16_v575qu.png'
+BRAND = 'https://res.cloudinary.com/dmbeoutyi/image/upload/w_72,h_72,c_fill,f_auto,q_auto/v1774666557/Untitled_design_16_v575qu.png'
 ICON = 'https://res.cloudinary.com/dmbeoutyi/image/upload/w_64,h_64,c_fill/v1774666557/Untitled_design_16_v575qu.png'
 MONTHS = ['January','February','March','April','May','June','July','August',
           'September','October','November','December']
@@ -77,15 +78,17 @@ def page(title, desc, path, body, ld=None):
 <meta property="og:image" content="{LOGO}">
 <meta property="og:site_name" content="DIAL·A·DEAD">
 <meta name="twitter:card" content="summary">
-{lds}<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+{lds}<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/pages.css">
 </head>
 <body>
-<div class="machine">
-<a class="brand" href="/"><img src="{LOGO}" alt="" width="36" height="36">DIAL·A·DEAD</a>
+<main class="machine">
+<a class="brand" href="/"><img src="{BRAND}" alt="" width="36" height="36">DIAL·A·DEAD</a>
 {body}
 <div class="foot"><a href="/">DIAL·A·DEAD</a> · Grateful Dead time machine · audio streams free from <a href="https://archive.org/details/GratefulDead">Archive.org</a></div>
-</div>
+</main>
 </body>
 </html>
 """

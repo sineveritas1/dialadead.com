@@ -87,7 +87,7 @@ def page(title, desc, path, body, ld=None):
 <main class="machine">
 <a class="brand" href="/"><img src="{BRAND}" alt="" width="36" height="36">DIAL·A·DEAD</a>
 {body}
-<div class="foot"><a href="/">DIAL·A·DEAD</a> · Grateful Dead time machine · audio streams free from <a href="https://archive.org/details/GratefulDead">Archive.org</a></div>
+<div class="foot"><a href="/">DIAL·A·DEAD</a> · Grateful Dead time machine · audio streams free from <a href="https://archive.org/details/GratefulDead">Archive.org</a><br>Fan-made · not affiliated with Grateful Dead or Grateful Dead Productions</div>
 </main>
 </body>
 </html>

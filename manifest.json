@@ -8,10 +8,16 @@
   "theme_color": "#39FF14",
   "icons": [
     {
-      "src": "https://res.cloudinary.com/dmbeoutyi/image/upload/v1774666557/Untitled_design_16_v575qu.png",
+      "src": "https://res.cloudinary.com/dmbeoutyi/image/upload/w_192,h_192,c_fill/v1774666557/Untitled_design_16_v575qu.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://res.cloudinary.com/dmbeoutyi/image/upload/w_512,h_512,c_fill/v1774666557/Untitled_design_16_v575qu.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }

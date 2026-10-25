@@ -7,3 +7,12 @@ https://gratefuldead.pages.dev/*
   X-Robots-Tag: noindex
 https://:branch.gratefuldead.pages.dev/*
   X-Robots-Tag: noindex
+
+# Security headers for every page. HSTS: browsers stay on https for a year
+# (no includeSubDomains/preload, so future subdomains aren't locked in).
+# SAMEORIGIN stops other sites framing the player; the Permissions-Policy
+# turns off device APIs the site never uses.
+/*
+  Strict-Transport-Security: max-age=31536000
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()

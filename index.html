@@ -592,12 +592,11 @@ html.purist .show-song{color:#CC0000cc;}
 
 .footer{text-align:center;margin-top:10px;font-size:clamp(15px,4.5vw,18px);color:#aaa;letter-spacing:1px;line-height:2.4;}
 
-.about{margin-top:18px;padding:14px 4px 0;border-top:1px solid #1e1e1e;text-align:center;}
-.about-h{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:2px;color:#39FF14;text-shadow:0 0 8px #39FF1466;margin:12px 0 8px;}
-.about p{font-size:13px;color:#aaa;line-height:1.7;letter-spacing:.3px;}
-.about-links{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;}
-.about-links a{font-size:12px;color:#00BFFF;text-decoration:none;border:1px solid #2a2a2a;border-radius:4px;padding:3px 7px;}
-.about-links a:hover{border-color:#FF149366;color:#FF1493;}
+.arch-about{font-size:11px;color:#888;letter-spacing:.5px;line-height:1.5;margin-bottom:8px;}
+.legends{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-bottom:10px;}
+.legends-h{font-size:10px;letter-spacing:2px;color:#39FF14;margin-right:2px;}
+.legends a{font-size:10px;letter-spacing:1px;color:#888;text-decoration:none;border:1px solid #2a2a2a;border-radius:4px;padding:4px 7px;}
+.legends a:hover{border-color:#FF149355;color:#FF1493;}
 
 .share-row{display:flex;justify-content:flex-end;margin-bottom:14px;}
 .btn-share{
@@ -828,12 +827,11 @@ html.purist .footer a[href*="neondeadhead"]{color:#003087 !important;text-shadow
 html.purist .footer a[href*="mailto"]{color:#003087 !important;text-shadow:none !important;}
 html.purist .footer a[href*="tel"]{color:#CC0000 !important;text-shadow:none !important;}
 
-/* About */
-html.purist .about{border-color:#cccccc;}
-html.purist .about-h{color:#CC0000;text-shadow:none;}
-html.purist .about p{color:#333333;}
-html.purist .about-links a{color:#003087;border-color:#cccccc;}
-html.purist .about-links a:hover{color:#CC0000;border-color:#CC0000;}
+/* Archive intro + legendary nights */
+html.purist .arch-about{color:#555555;}
+html.purist .legends-h{color:#CC0000;}
+html.purist .legends a{color:#555555;border-color:#cccccc;}
+html.purist .legends a:hover{color:#CC0000;border-color:#CC0000;}
 
 /* Misc */
 html.purist .no-shows{color:#aaaaaa;}
@@ -1027,6 +1025,10 @@ html.purist .source-select option{background:#fff;color:#003087;}
   </div>
 
   <div class="archive-body" id="archive-body">
+    <!-- Plain HTML on purpose: search engines read it even while the panel is
+         collapsed, and the links lead them into the static /show pages. -->
+    <p class="arch-about">Free Grateful Dead time machine: stream any show from 1965–1995, straight from Archive.org.</p>
+    <nav class="legends"><span class="legends-h">LEGENDARY NIGHTS</span> <a href="/show/1977-05-08" onclick="dialShow('1977-05-08');return false">Cornell 5/8/77</a> <a href="/show/1972-08-27" onclick="dialShow('1972-08-27');return false">Veneta 8/27/72</a> <a href="/show/1974-02-24" onclick="dialShow('1974-02-24');return false">Winterland 2/24/74</a> <a href="/show/1969-02-27" onclick="dialShow('1969-02-27');return false">Fillmore West 2/27/69</a> <a href="/show/1971-04-29" onclick="dialShow('1971-04-29');return false">Fillmore East 4/29/71</a> <a href="/show/1973-12-02" onclick="dialShow('1973-12-02');return false">Boston 12/2/73</a> <a href="/show/1978-01-22" onclick="dialShow('1978-01-22');return false">Eugene 1/22/78</a> <a href="/show/1989-07-07" onclick="dialShow('1989-07-07');return false">JFK 7/7/89</a> <a href="/show/1990-03-29" onclick="dialShow('1990-03-29');return false">Nassau 3/29/90</a></nav>
     <div class="year-tabs" id="year-tabs"></div>
     <input class="show-search" id="show-search"
       placeholder="SEARCH SONG, VENUE, CITY, DATE..." oninput="filterShows()">
@@ -1045,15 +1047,6 @@ html.purist .source-select option{background:#fff;color:#003087;}
   </div>
   <div class="share-toast" id="share-toast">LINK COPIED!</div>
   <div class="fave-toast" id="fave-toast"></div>
-  <!-- ABOUT — plain HTML so search engines can read the page without running JS -->
-  <section class="about">
-    <h2 class="about-h">STREAM ANY GRATEFUL DEAD SHOW · 1965–1995</h2>
-    <p>DIAL·A·DEAD is a free Grateful Dead time machine. Type a date, hit ENGAGE, and that night's concert streams straight from the Internet Archive's Grateful Dead collection — soundboards, matrixes and audience tapes for 2,000+ shows, with setlists, favorites and downloads. No account, no ads.</p>
-    <h2 class="about-h">BROWSE BY YEAR</h2>
-    <nav class="about-links"><a href="/year/1965">1965</a> <a href="/year/1966">1966</a> <a href="/year/1967">1967</a> <a href="/year/1968">1968</a> <a href="/year/1969">1969</a> <a href="/year/1970">1970</a> <a href="/year/1971">1971</a> <a href="/year/1972">1972</a> <a href="/year/1973">1973</a> <a href="/year/1974">1974</a> <a href="/year/1975">1975</a> <a href="/year/1976">1976</a> <a href="/year/1977">1977</a> <a href="/year/1978">1978</a> <a href="/year/1979">1979</a> <a href="/year/1980">1980</a> <a href="/year/1981">1981</a> <a href="/year/1982">1982</a> <a href="/year/1983">1983</a> <a href="/year/1984">1984</a> <a href="/year/1985">1985</a> <a href="/year/1986">1986</a> <a href="/year/1987">1987</a> <a href="/year/1988">1988</a> <a href="/year/1989">1989</a> <a href="/year/1990">1990</a> <a href="/year/1991">1991</a> <a href="/year/1992">1992</a> <a href="/year/1993">1993</a> <a href="/year/1994">1994</a> <a href="/year/1995">1995</a></nav>
-    <h2 class="about-h">LEGENDARY NIGHTS</h2>
-    <nav class="about-links"><a href="/show/1977-05-08">Cornell 5/8/77</a> <a href="/show/1972-08-27">Veneta 8/27/72</a> <a href="/show/1974-02-24">Winterland 2/24/74</a> <a href="/show/1969-02-27">Fillmore West 2/27/69</a> <a href="/show/1971-04-29">Fillmore East 4/29/71</a> <a href="/show/1973-12-02">Boston 12/2/73</a> <a href="/show/1978-01-22">Eugene 1/22/78</a> <a href="/show/1989-07-07">JFK 7/7/89</a> <a href="/show/1990-03-29">Nassau 3/29/90</a></nav>
-  </section>
 <div class="footer">
   <a href="https://archive.org/details/GratefulDead" style="color:#888;text-decoration:none;">☆ GRATEFUL DEAD ARCHIVE.ORG ☆</a><br>
   <a href="https://neondeadhead.com" style="color:#39FF14;text-decoration:none;text-shadow:0 0 8px #39FF1466;">NEONDEADHEAD.COM</a><br>

@@ -99,9 +99,12 @@ The app draws everything with JS, so its raw HTML is close to empty and every
 show lives at a `?date=` URL nothing links to. Google indexed **zero** pages of
 it. The fix is plain HTML that reads without JS:
 
-- `index.html` has a real `<h1>` and a static **about** block (description,
-  links to every `/year/YYYY`, a few legendary `/show/…` nights). Keep it
-  static — don't move it into JS.
+- `index.html` has a real `<h1>`, and the top of the collapsed SHOW ARCHIVE
+  panel holds one plain-HTML sentence plus **LEGENDARY NIGHTS** links to
+  `/show/…` (which `dialShow()` in-app on click). Search engines read
+  collapsed content, so this costs no screen height — the homepage must stay a
+  single screen. Keep it static, not JS-rendered. Year pages are found via the
+  sitemap and the show pages' breadcrumbs, not homepage links.
 - `build_pages.py` writes one page per show (`show/YYYY-MM-DD.html`: venue,
   city, recording type, songs A–Z from `songs.json`, prev/next, MusicEvent
   JSON-LD, a **▶ PLAY THIS SHOW** link to `/?date=…`) and one per year, plus

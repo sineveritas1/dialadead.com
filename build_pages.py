@@ -127,7 +127,8 @@ def show_page(k, s, prev, nxt, songs):
                 + (f'<a href="/show/{prev}">← {esc(long_date(prev))}</a>' if prev else '<span></span>')
                 + (f'<a href="/show/{nxt}">{esc(long_date(nxt))} →</a>' if nxt else '<span></span>') + '</div>')
     ld = {'@context': 'https://schema.org', '@type': 'MusicEvent',
-          'name': f'Grateful Dead — {ld_date}', 'startDate': k,
+          'name': f'Grateful Dead — {ld_date}', 'startDate': k, 'endDate': k,
+          'description': desc, 'image': LOGO,
           'eventStatus': 'https://schema.org/EventScheduled',
           'eventAttendanceMode': 'https://schema.org/OfflineEventAttendanceMode',
           'performer': {'@type': 'MusicGroup', 'name': 'Grateful Dead'},

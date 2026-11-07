@@ -1,8 +1,9 @@
 # Cloudflare Pages response headers. https://developers.cloudflare.com/pages/configuration/headers/
 #
-# The production deploy is also reachable at gratefuldead.pages.dev — a full
+# The production deploy is also reachable at gratefuldead.pages.dev, a full
 # duplicate of dialadead.com. Keep it (and branch previews) out of search so
-# Google only ever indexes the real domain.
+# Google only ever indexes the real domain. (Production pages.dev also 301s to
+# dialadead.com through an account-level Bulk Redirect.)
 https://gratefuldead.pages.dev/*
   X-Robots-Tag: noindex
 https://:branch.gratefuldead.pages.dev/*
@@ -16,3 +17,45 @@ https://:branch.gratefuldead.pages.dev/*
   Strict-Transport-Security: max-age=31536000
   X-Frame-Options: SAMEORIGIN
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+
+# Caching. Nothing here is fingerprinted (no hashed file names), so nothing
+# gets "immutable": a long browser TTL on pages.css would keep old styles on
+# phones for a year after a deploy. Each path gets one Cache-Control line only;
+# Pages joins duplicate headers with a comma, so rules must not overlap.
+#
+# s-maxage is what the Cloudflare edge keeps. It only takes effect once the
+# dashboard Cache Rule marks these paths "Eligible for cache" (HTML and JSON
+# are not cached by default). A Pages deploy does not purge the zone cache:
+# after a deploy that changes shows or show pages, Purge Everything.
+
+# Homepage (and /?date=...): edge 5 min, browsers always revalidate.
+/
+  Cache-Control: public, max-age=0, s-maxage=300, stale-while-revalidate=86400
+
+# Historical archive data: changes only when shows.json is rebuilt.
+/show/*
+  Cache-Control: public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800
+/year/*
+  Cache-Control: public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800
+/shows.json
+  Cache-Control: public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800
+/songs.json
+  Cache-Control: public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800
+
+# Crawler and app metadata.
+/sitemap.xml
+  Cache-Control: public, max-age=3600, s-maxage=86400
+/robots.txt
+  Cache-Control: public, max-age=3600, s-maxage=86400
+/llms.txt
+  Cache-Control: public, max-age=3600, s-maxage=86400
+/manifest.json
+  Cache-Control: public, max-age=86400, s-maxage=86400
+/opensearch.xml
+  Cache-Control: public, max-age=86400, s-maxage=86400
+
+# Static assets (not fingerprinted, so a day in browsers, a week at the edge).
+/pages.css
+  Cache-Control: public, max-age=86400, s-maxage=604800
+/Skull.png
+  Cache-Control: public, max-age=604800, s-maxage=604800

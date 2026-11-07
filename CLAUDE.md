@@ -25,7 +25,7 @@ repo root.
 | `show/*.html`, `year/*.html`, `pages.css` | **Generated** static SEO pages — see "Search engines" below. Served at `/show/YYYY-MM-DD` and `/year/YYYY`. Don't hand-edit. |
 | `build_pages.py` | **Regenerates** `show/`, `year/`, `pages.css` and `sitemap.xml` from `shows.json` + `songs.json`. No network. Re-run whenever either JSON changes. |
 | `_redirects`     | Cloudflare Pages redirect rules (maps `/favicon.ico` and `/apple-touch-icon.png` to the Cloudinary logo). |
-| `_headers`       | Cloudflare Pages headers: `X-Robots-Tag: noindex` on `gratefuldead.pages.dev` so the duplicate host stays out of Google. |
+| `_headers`       | Cloudflare Pages headers: `X-Robots-Tag: noindex` on `gratefuldead.pages.dev`, security headers, and per-path `Cache-Control` (edge `s-maxage` takes effect via a dashboard Cache Rule). One Cache-Control rule per path: Pages joins duplicates with a comma. |
 | `songs.json`     | Song-title index: `{ "d": [dates...], "s": { "Althea": "1f,2a,..." } }` — values are base36 offsets into `d`. Powers **search by song**. Fetched lazily, only on the first archive search. |
 | `build_shows.py`  | **Regenerates `shows.json`** from Archive.org. See below. Not part of the served site. |
 | `build_songs.py` | **Regenerates `songs.json`.** One metadata request per show (~2,000), so it is rate-limited to 4 workers / 0.25s and takes ~10 minutes. Not part of the served site. |
@@ -290,6 +290,11 @@ spot-check instead.
   email and injects an `email-decode` script). Do **not** copy the *served* HTML
   back into the repo verbatim — you'd bake in Cloudflare artifacts. Edit the
   source here.
+- **Edge cache.** A dashboard Cache Rule makes `/`, `/show/*`, `/year/*` and the
+  JSON/XML files cacheable at the edge, honoring the `s-maxage` in `_headers`
+  (up to a day for show pages). A Pages deploy does **not** purge that cache, so
+  after a deploy that changes pages, purge in Cloudflare (Caching, Configuration,
+  Purge Everything) before checking the live site.
 - **Every branch gets a Cloudflare preview URL** (`https://<branch>.gratefuldead.pages.dev`),
   posted by the Pages bot on the PR. Test changes there on a real phone before
   merging to `main` — much better than shipping to production to find out.

@@ -1,0 +1,11 @@
+# Deploy:  cd email-worker && npx wrangler deploy
+# Then set FORWARD_TO etc. in the dashboard (Worker → Settings → Variables), or:
+#   npx wrangler secret put FORWARD_TO
+# Don't put addresses in this file — the repo root is served publicly by Pages.
+name = "dialadead-email"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+workers_dev = false
+
+[observability]
+enabled = true

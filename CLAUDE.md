@@ -32,6 +32,7 @@ repo root.
 | `audit_shows.py` | Maintenance script: checks every `shows.json` entry against Archive.org for dead links / missing MP3s. `python3 audit_shows.py` to report, `--fix` to prune bad shows. Not part of the served site. |
 | `Skull.png`      | Fallback icon / social image (the live logo is served from Cloudinary). |
 | `README.md`      | Public-facing blurb. |
+| `email-worker/`  | Cloudflare **Email Worker** for inbound `*@dialadead.com` mail (forward/bounce). Deployed separately with wrangler or the dashboard, **not** part of the site; `_redirects` keeps it unreachable. Setup: `email-worker/README.md`. No addresses in the code; they live in Worker variables. |
 
 ## Architecture / how it works
 

@@ -906,16 +906,35 @@ input.digit::placeholder{-webkit-text-stroke:inherit;}
 .footer{-webkit-text-stroke:.9px currentColor;}
 .disclaimer{-webkit-text-stroke:.5px currentColor;}
 .nav-label{-webkit-text-stroke:.65px currentColor;}
-/* The smallest labels, one pixel up (8-9px is below comfortable phone reading). */
-.dest-lbl,.dest-hint,.show-meta,.dl-warn-btn,.source-label,
-.setup-box p,.disclaimer,.fave-date{font-size:10px;}
-.time-display,.faves-empty,.legends-h,.legends a,.faves-header,
-.btn-share,.btn-fave,.purist-btn{font-size:11px;}
-.fave-venue,.fave-city{font-size:9px;}
-.show-src{font-size:clamp(9px,2.6vw,11px);}
-.dest-hint{letter-spacing:.3px;}
-.tracklist-label,.track-count{font-size:clamp(10px,2.8vw,12px);}
-.archive-toggle-label,.archive-badge,.show-venue,.show-city{font-size:clamp(10px,2.9vw,12px);}
+/* The smallest labels: bigger, with tighter letter spacing. At 9-11px wide
+   tracking hurts reading more than it helps, and trimming it pays for the
+   extra size, so nothing new wraps (checked at 360/390/412px). */
+.subtitle{font-size:11px;letter-spacing:2px;}
+.dest-lbl{font-size:12px;letter-spacing:1.5px;}
+.dest-hint{font-size:clamp(10px,2.85vw,11px);letter-spacing:0;}
+.show-meta{font-size:12px;letter-spacing:.5px;}
+.disclaimer{font-size:12px;}
+.setup-box p{font-size:11px;letter-spacing:.5px;}
+.fave-date{font-size:11px;letter-spacing:.5px;}
+.fave-venue,.fave-city{font-size:11px;}
+.show-src{font-size:clamp(11px,3.1vw,13px);letter-spacing:.5px;}
+.nav-label{font-size:clamp(9px,2.6vw,11px);letter-spacing:1px;}
+.show-dl-btn{font-size:10px;letter-spacing:1px;}
+.time-display{font-size:13px;}
+.tracklist-label,.track-count{font-size:clamp(11px,3.3vw,14px);letter-spacing:2px;}
+.archive-toggle-label,.archive-badge{font-size:clamp(11px,3.4vw,14px);letter-spacing:2px;}
+.source-label{font-size:12px;letter-spacing:1px;}
+.faves-header{font-size:12px;letter-spacing:2px;}
+.faves-empty{font-size:12px;letter-spacing:1px;}
+.legends-h{font-size:12px;letter-spacing:1px;}
+.legends a{font-size:12px;letter-spacing:.5px;}
+.btn-share,.btn-fave{font-size:12px;letter-spacing:1px;}
+.purist-btn{font-size:12px;letter-spacing:1.5px;}
+.dl-warn-btn{font-size:11px;letter-spacing:1px;}
+.show-venue,.show-city{font-size:clamp(10px,2.9vw,12px);}
+/* Neon ENGAGE: white on hot pink was 3.6:1; black is 5.7:1. */
+.btn-engage{color:#000;text-shadow:none;}
+html.purist .btn-engage{color:#fff;}
 /* faint labels: a step more contrast */
 .faves-empty{color:#aaa;}
 .disclaimer{color:#888;}

@@ -897,6 +897,21 @@ html.purist .source-label{color:#003087;text-shadow:none;}
 html.purist .source-select{background-color:#fff;border-color:#00308744;color:#003087;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23003087'/%3E%3C/svg%3E");}
 html.purist .source-select option{background:#fff;color:#003087;}
+
+/* ── HEAVIER TEXT ── Share Tech Mono ships a single hairline weight. A text
+   stroke thickens every glyph without changing its advance width, so nothing
+   wraps, widens or moves. Inherited, and drawn in each element's own color. */
+body{-webkit-text-stroke:.55px currentColor;}
+input.digit::placeholder{-webkit-text-stroke:inherit;}
+.footer{-webkit-text-stroke:.8px currentColor;}
+.disclaimer{-webkit-text-stroke:.4px currentColor;}
+/* faint labels: a step more contrast */
+.faves-empty{color:#aaa;}
+.disclaimer{color:#888;}
+html.purist .faves-empty{color:#777;}
+html.purist .disclaimer{color:#666;}
+html.purist .sep{color:#CC000088;}
+html.purist input.digit::placeholder{color:#CC00004d;}
 </style>
 </head>
 <body>

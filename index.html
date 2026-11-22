@@ -901,16 +901,47 @@ html.purist .source-select option{background:#fff;color:#003087;}
 /* ── HEAVIER TEXT ── Share Tech Mono ships a single hairline weight. A text
    stroke thickens every glyph without changing its advance width, so nothing
    wraps, widens or moves. Inherited, and drawn in each element's own color. */
-body{-webkit-text-stroke:.55px currentColor;}
+body{-webkit-text-stroke:.65px currentColor;}
 input.digit::placeholder{-webkit-text-stroke:inherit;}
-.footer{-webkit-text-stroke:.8px currentColor;}
-.disclaimer{-webkit-text-stroke:.4px currentColor;}
+.footer{-webkit-text-stroke:.9px currentColor;}
+.disclaimer{-webkit-text-stroke:.5px currentColor;}
+.nav-label{-webkit-text-stroke:.65px currentColor;}
+/* The smallest labels, one pixel up (8-9px is below comfortable phone reading). */
+.dest-lbl,.dest-hint,.show-meta,.dl-warn-btn,.source-label,
+.setup-box p,.disclaimer,.fave-date{font-size:10px;}
+.time-display,.faves-empty,.legends-h,.legends a,.faves-header,
+.btn-share,.btn-fave,.purist-btn{font-size:11px;}
+.fave-venue,.fave-city{font-size:9px;}
+.show-src{font-size:clamp(9px,2.6vw,11px);}
+.dest-hint{letter-spacing:.3px;}
+.tracklist-label,.track-count{font-size:clamp(10px,2.8vw,12px);}
+.archive-toggle-label,.archive-badge,.show-venue,.show-city{font-size:clamp(10px,2.9vw,12px);}
 /* faint labels: a step more contrast */
 .faves-empty{color:#aaa;}
 .disclaimer{color:#888;}
-html.purist .faves-empty{color:#777;}
+html.purist .faves-empty{color:#666;}
 html.purist .disclaimer{color:#666;}
-html.purist .sep{color:#CC000088;}
+html.purist .sep{color:#CC0000aa;}
+/* WCAG AA: small text needs 4.5:1 against its background, icons 3:1.
+   These were dimmed well below that; they stay a step quieter than full color. */
+.sep{color:#FF1493aa;}
+.show-nav-btn{color:#FF1493cc;}
+.nav-label{color:#FF1493;}
+.show-nav-btn{-webkit-text-stroke-color:#FF1493cc;}
+.show-dl-btn{color:#FF1493;}
+.track-dl,.track-sh,.fave-remove{color:#999;}
+.track-item.active .track-dl,.track-item.active .track-sh{color:#FF1493;}
+.show-src.aud{color:#00BFFFcc;}
+.show-partial{color:#FFA500cc;}
+html.purist .show-nav-btn{color:#CC0000cc;-webkit-text-stroke-color:#CC0000cc;}
+html.purist .nav-label,html.purist .show-dl-btn{color:#CC0000;}
+html.purist .track-dl,html.purist .track-sh,html.purist .fave-remove{color:#6e6e6e;}
+html.purist .track-item.active .track-dl,html.purist .track-item.active .track-sh{color:#CC0000;}
+html.purist .track-num,html.purist .track-dur{color:#666 !important;}
+html.purist .track-item.active .track-dur{color:#CC0000 !important;}
+html.purist .show-src.aud{color:#003087cc;}
+html.purist .show-partial{color:#666;}
+html.purist .btn-fave.saved{background:#CC000015;}
 html.purist input.digit::placeholder{color:#CC00004d;}
 </style>
 </head>
@@ -1067,11 +1098,11 @@ html.purist input.digit::placeholder{color:#CC00004d;}
   <div class="share-toast" id="share-toast">LINK COPIED!</div>
   <div class="fave-toast" id="fave-toast"></div>
 <div class="footer">
-  <a href="https://archive.org/details/GratefulDead" style="color:#888;text-decoration:none;">☆ GRATEFUL DEAD ARCHIVE.ORG ☆</a><br>
-  <a href="https://neondeadhead.com" style="color:#39FF14;text-decoration:none;text-shadow:0 0 8px #39FF1466;">NEONDEADHEAD.COM</a><br>
   <!--email_off--><a href="mailto:hello@neondeadhead.com" style="color:#00BFFF;text-decoration:none;text-shadow:0 0 10px #00BFFF;">HELLO@NEONDEADHEAD.COM</a><!--/email_off--><br>
+  <a href="https://neondeadhead.com" style="color:#39FF14;text-decoration:none;text-shadow:0 0 8px #39FF1466;">NEONDEADHEAD.COM</a><br>
   <a href="tel:+19048782546" style="color:#FF1493;text-decoration:none;text-shadow:0 0 8px #FF149355;">(904) TRUCKIN'</a><br>
-  <a href="tel:+19048782546" style="color:#FF1493;text-decoration:none;text-shadow:0 0 8px #FF149355;">(904) 878-2546</a>
+  <a href="tel:+19048782546" style="color:#FF1493;text-decoration:none;text-shadow:0 0 8px #FF149355;">(904) 878-2546</a><br>
+  <a href="https://archive.org/details/GratefulDead" style="color:#888;text-decoration:none;">☆ GRATEFUL DEAD ARCHIVE.ORG ☆</a>
   <div class="disclaimer">Fan-made site</div>
 </div>
 </main>
@@ -1242,7 +1273,7 @@ async function engage(){
   // let those through, and they'd otherwise read as "no concert that night".
   const probe=new Date(y,m-1,d);
   if(probe.getMonth()!==m-1||probe.getDate()!==d){
-    setStatus('err',`☠ THAT DATE DOESN'T EXIST<br><span style="font-size:9px">${MONTHS[m-1]} HAS NO DAY ${d}</span>`);
+    setStatus('err',`☠ THAT DATE DOESN'T EXIST<br><span style="font-size:10px">${MONTHS[m-1]} HAS NO DAY ${d}</span>`);
     return;
   }
   const ms=String(m).padStart(2,'0'),ds=String(d).padStart(2,'0'),key=`${y}-${ms}-${ds}`;
@@ -1275,7 +1306,7 @@ async function engage(){
     if(gen!==loadGen) return;
     // Don't tell someone to check their connection when it's archive.org that's down.
     setStatus('err',isOffline(e)?OFFLINE_MSG
-      :`☠ CAN'T REACH ARCHIVE.ORG<br><span style="font-size:9px">CHECK YOUR CONNECTION AND TRY AGAIN</span>`);
+      :`☠ CAN'T REACH ARCHIVE.ORG<br><span style="font-size:10px">CHECK YOUR CONNECTION AND TRY AGAIN</span>`);
   }
 }
 
@@ -1292,10 +1323,10 @@ async function engage(){
 // bug in this site and cost an afternoon of chasing, because the message said
 // the RECORDING wouldn't load. Say what is actually happening, and don't burn
 // twenty seconds on retries and fallbacks when the whole archive is down.
-const OFFLINE_MSG='☠ ARCHIVE.ORG IS OFFLINE<br><span style="font-size:9px">'
+const OFFLINE_MSG='☠ ARCHIVE.ORG IS OFFLINE<br><span style="font-size:10px">'
   +'THE INTERNET ARCHIVE IS DOWN RIGHT NOW — NOT THIS SITE.<br>'
   +'EVERY SHOW STREAMS FROM THEM. TRY AGAIN LATER.</span>';
-const UNREACHABLE_MSG='☠ CAN\'T REACH ARCHIVE.ORG<br><span style="font-size:9px">'
+const UNREACHABLE_MSG='☠ CAN\'T REACH ARCHIVE.ORG<br><span style="font-size:10px">'
   +'ARCHIVE.ORG MAY BE DOWN, OR YOUR CONNECTION DROPPED.<br>'
   +'EVERY SHOW STREAMS FROM THEM. TRY AGAIN IN A BIT.</span>';
 const isOffline=e=>e&&e.status===503;
@@ -1349,7 +1380,7 @@ async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen,skipSources
     }
     const seen=new Set();
     const mp3s=pool.filter(f=>{const n=trackKey(f.name);if(n===null)return true;if(seen.has(n))return false;seen.add(n);return true;});
-    if(!mp3s.length){setStatus('err','☠ NO PLAYABLE AUDIO FOR THIS RECORDING<br><span style="font-size:9px">TRY ANOTHER SOURCE IN THE RECORDING LIST</span>');return;}
+    if(!mp3s.length){setStatus('err','☠ NO PLAYABLE AUDIO FOR THIS RECORDING<br><span style="font-size:10px">TRY ANOTHER SOURCE IN THE RECORDING LIST</span>');return;}
     const v=venue||meta.metadata?.venue||'';
     const c=city||meta.metadata?.coverage||'';
     const isSbd=type==='sbd'||/sbd|soundboard|matrix/i.test(identifier);
@@ -1386,7 +1417,7 @@ async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen,skipSources
     }
     // Only blame the recording when archive.org actually answered about it.
     setStatus('err',isUnreachable(e)?UNREACHABLE_MSG
-      :'☠ COULDN\'T LOAD THIS RECORDING<br><span style="font-size:9px">ARCHIVE.ORG MAY BE BUSY — TRY AGAIN OR PICK ANOTHER SOURCE</span>');
+      :'☠ COULDN\'T LOAD THIS RECORDING<br><span style="font-size:10px">ARCHIVE.ORG MAY BE BUSY — TRY AGAIN OR PICK ANOTHER SOURCE</span>');
   }
 }
 
@@ -1868,7 +1899,7 @@ audio.addEventListener('error',()=>{
   // a run of dead tracks means the connection is gone, not that the show is.
   if(++deadSkips>MAX_SKIP){
     document.getElementById('play-pause-btn').classList.add('paused');
-    setStatus('err','☠ LOST THE SIGNAL<br><span style="font-size:9px">ARCHIVE.ORG STOPPED ANSWERING — HIT PLAY TO PICK IT BACK UP</span>');
+    setStatus('err','☠ LOST THE SIGNAL<br><span style="font-size:10px">ARCHIVE.ORG STOPPED ANSWERING — HIT PLAY TO PICK IT BACK UP</span>');
     return;
   }
   if(tracks.length&&idx<tracks.length-1){
@@ -1967,7 +1998,7 @@ function randomShow(){
   window.scrollTo({top:0,behavior:'smooth'});
   const where=[s.venue,s.city].filter(Boolean).join(' · ');
   setStatus('ok',`⚡ ${MONTHS[m-1]} ${String(d).padStart(2,'0')} ${y} DIALED`
-    +(where?`<br><span style="font-size:9px">${escHtml(where)}</span>`:'')
+    +(where?`<br><span style="font-size:10px">${escHtml(where)}</span>`:'')
     +`<br><span style="font-size:10px">PRESS ENGAGE TO PLAY</span>`);
   armEngage();
 }
@@ -2010,7 +2041,7 @@ function wildcardEngage(m,d,y){
   setStatus('',`<span class="loading">⟳</span> ${escHtml(label)} · ${list.length} MATCH${list.length===1?'':'ES'}`
     +`<br><span style="font-size:10px">${wildIdx+1} OF ${list.length}`
     +(list.length>1?' · ENGAGE AGAIN FOR NEXT':'')+`</span>`
-    +(where?`<br><span style="font-size:9px">${escHtml(where)}</span>`:''));
+    +(where?`<br><span style="font-size:10px">${escHtml(where)}</span>`:''));
   loadShow(s.id,sm,sd,sy,s.venue,s.city,s.type,gen);
 }
 
@@ -2040,10 +2071,10 @@ function noShowHere(key,m,d,y){
   const where=[near.show.venue,near.show.city].filter(Boolean).join(' · ');
   setStatus('err',
     `☠ SORRY — NO CONCERT ON ${ms}/${ds}/${y}`
-    +`<br><span style="font-size:9px">THE DEAD DIDN'T PLAY THIS NIGHT</span>`
+    +`<br><span style="font-size:10px">THE DEAD DIDN'T PLAY THIS NIGHT</span>`
     +`<br><span style="font-size:10px;color:#39FF14">⟳ JUMPING TO NEAREST · `
     +`${MONTHS[nm-1]} ${String(nd).padStart(2,'0')} ${ny}</span>`
-    +(where?`<br><span style="font-size:9px">${escHtml(where)}</span>`:''));
+    +(where?`<br><span style="font-size:10px">${escHtml(where)}</span>`:''));
   // Long enough to read the message before the screen changes under them.
   clearTimeout(nearestTimer);
   nearestTimer=setTimeout(()=>dialShow(near.show.date),2200);
@@ -2097,7 +2128,7 @@ function todayShow(){
     ? `★ NO SHOW TODAY — NEAREST: ${MONTHS[m-1]} ${String(d).padStart(2,'0')}`
     : `★ ON THIS DAY · ${MONTHS[m-1]} ${String(d).padStart(2,'0')}`;
   setStatus('ok',`${head} · ${y}`
-    +`<br><span style="font-size:9px">${escHtml(where||'—')}</span>`
+    +`<br><span style="font-size:10px">${escHtml(where||'—')}</span>`
     +`<br><span style="font-size:10px">${todayIdx+1} OF ${list.length} · PRESS ENGAGE TO PLAY</span>`);
   armEngage();
 }

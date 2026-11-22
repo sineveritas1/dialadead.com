@@ -904,6 +904,8 @@ html.purist .source-select option{background:#fff;color:#003087;}
 body{-webkit-text-stroke:.65px currentColor;}
 input.digit::placeholder{-webkit-text-stroke:inherit;}
 .footer{-webkit-text-stroke:.9px currentColor;}
+/* the two phone lines are one number: keep them together */
+.footer-phones{line-height:1.35;margin:9px 0 8px;}
 .disclaimer{-webkit-text-stroke:.5px currentColor;}
 .nav-label{-webkit-text-stroke:.65px currentColor;}
 /* The smallest labels: bigger, with tighter letter spacing. At 9-11px wide
@@ -1119,8 +1121,8 @@ html.purist input.digit::placeholder{color:#CC00004d;}
 <div class="footer">
   <!--email_off--><a href="mailto:hello@neondeadhead.com" style="color:#00BFFF;text-decoration:none;text-shadow:0 0 10px #00BFFF;">HELLO@NEONDEADHEAD.COM</a><!--/email_off--><br>
   <a href="https://neondeadhead.com" style="color:#39FF14;text-decoration:none;text-shadow:0 0 8px #39FF1466;">NEONDEADHEAD.COM</a><br>
-  <a href="tel:+19048782546" style="color:#FF1493;text-decoration:none;text-shadow:0 0 8px #FF149355;">(904) TRUCKIN'</a><br>
-  <a href="tel:+19048782546" style="color:#FF1493;text-decoration:none;text-shadow:0 0 8px #FF149355;">(904) 878-2546</a><br>
+  <div class="footer-phones"><a href="tel:+19048782546" style="color:#FF1493;text-decoration:none;text-shadow:0 0 8px #FF149355;">(904) TRUCKIN'</a><br>
+  <a href="tel:+19048782546" style="color:#FF1493;text-decoration:none;text-shadow:0 0 8px #FF149355;">(904) 878-2546</a></div>
   <a href="https://archive.org/details/GratefulDead" style="color:#888;text-decoration:none;">☆ GRATEFUL DEAD ARCHIVE.ORG ☆</a>
   <div class="disclaimer">Fan-made site</div>
 </div>

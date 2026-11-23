@@ -1843,9 +1843,9 @@ function playTrack(i,auto){
   // Reassigning src implicitly aborts the previous load. We deliberately do NOT
   // set src='' first — that briefly drops the media session and is the classic
   // cause of playback stalling after a track or two when backgrounded.
-  // A warmed next track plays straight from the file server, skipping
-  // archive.org's redirect. One use only: replays and retries go back through
-  // archive.org, so a stale server address can't get a track stuck.
+  // Once warmNext() has learned the file server, tracks play straight from it,
+  // skipping archive.org's redirect. One use per address: retries go back
+  // through archive.org, so a stale server address can't get a track stuck.
   const t=tracks[i];
   audio.src=t.fast||t.url; delete t.fast;
   const p=audio.play();
@@ -1953,16 +1953,24 @@ let seeking=false, rafPending=false;
 // Warm up the next track once this one has played 1s (so it isn't competing
 // with this track's own start): fetch its first 256KB (~10s of audio). That
 // opens the connection to the file server and learns where archive.org
-// redirects the file, so both the switch at 'ended' and an early NEXT tap skip
-// that (~1s saved). Next track only, once per track and one small request:
-// preloading more is what gets streams throttled or cut.
+// redirects the file. Every track of a recording sits on that same server, so
+// that one answer gives all of them a direct address: whatever plays next -
+// the automatic switch, NEXT/PREV, or a tap anywhere in the setlist - skips
+// archive.org's redirect (~1s saved). One small request per track, and the
+// audio itself only for the next one: preloading more is what gets streams
+// throttled or cut.
 let warmedUrl=null;
 function warmNext(){
-  const t=tracks[currentTrack+1];
+  const t=tracks[currentTrack+1], list=tracks;
   if(!t||t.url===warmedUrl) return;
   warmedUrl=t.url;
   fetch(t.url,{headers:{Range:'bytes=0-262143'}}).then(r=>{
-    if(r.ok&&r.url&&r.url!==t.url&&/^https:\/\/[\w.-]+\.archive\.org\//.test(r.url)) t.fast=r.url;
+    const name=t.url.slice(t.url.lastIndexOf('/')+1);
+    if(r.ok&&list===tracks&&/^https:\/\/[\w.-]+\.archive\.org\//.test(r.url)&&r.url.endsWith('/'+name)){
+      const base=r.url.slice(0,-name.length);
+      // A file in a subfolder (%2F in its name) may not map 1:1; leave it on the redirect.
+      for(const x of list){const n=x.url.slice(x.url.lastIndexOf('/')+1);if(!n.includes('%2F')) x.fast=base+n;}
+    }
     return r.arrayBuffer();
   }).catch(()=>{});
 }

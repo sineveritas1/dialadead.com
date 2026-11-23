@@ -526,10 +526,10 @@ html.purist .track-item.active .track-dl{color:#CC000066;}
 }
 .archive-body.open{display:block;}
 
-.year-tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:10px;}
+.year-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px;}
 .ytab{
-  font-family:'Share Tech Mono',monospace;font-size:clamp(10px,3vw,12px);
-  letter-spacing:1px;padding:4px 0;
+  font-family:'Share Tech Mono',monospace;font-size:clamp(14px,4.2vw,17px);
+  letter-spacing:2px;padding:9px 0;
   width:auto;min-width:0;text-align:center;
   border:1px solid #2a2a2a;border-radius:4px;
   cursor:pointer;background:transparent;color:#888;
@@ -930,6 +930,10 @@ input.digit::placeholder{-webkit-text-stroke:inherit;}
 .faves-empty{font-size:12px;letter-spacing:1px;}
 .legends-h{font-size:12px;letter-spacing:1px;}
 .legends a{font-size:12px;letter-spacing:.5px;}
+/* Section headers in the archive panel: centered on their own line. */
+.legends{justify-content:center;}
+.legends-h{flex-basis:100%;text-align:center;letter-spacing:2px;margin:0 0 4px;}
+.arch-h{margin-bottom:8px;}
 .btn-share,.btn-fave{font-size:12px;letter-spacing:1px;}
 .purist-btn{font-size:12px;letter-spacing:1.5px;}
 .dl-warn-btn{font-size:11px;letter-spacing:1px;}
@@ -1099,7 +1103,8 @@ html.purist input.digit::placeholder{color:#CC00004d;}
     <!-- Plain HTML on purpose: search engines read it even while the panel is
          collapsed, and the links lead them into the static /show pages. -->
     <p class="arch-about">Free Grateful Dead time machine: stream any show from 1965–1995, straight from Archive.org.</p>
-    <nav class="legends"><span class="legends-h">LEGENDARY NIGHTS</span> <a href="/show/1977-05-08" onclick="dialShow('1977-05-08');return false">Cornell 5/8/77</a> <a href="/show/1972-08-27" onclick="dialShow('1972-08-27');return false">Veneta 8/27/72</a> <a href="/show/1974-02-24" onclick="dialShow('1974-02-24');return false">Winterland 2/24/74</a> <a href="/show/1969-02-27" onclick="dialShow('1969-02-27');return false">Fillmore West 2/27/69</a> <a href="/show/1971-04-29" onclick="dialShow('1971-04-29');return false">Fillmore East 4/29/71</a> <a href="/show/1973-12-02" onclick="dialShow('1973-12-02');return false">Boston 12/2/73</a> <a href="/show/1978-01-22" onclick="dialShow('1978-01-22');return false">Eugene 1/22/78</a> <a href="/show/1989-07-07" onclick="dialShow('1989-07-07');return false">JFK 7/7/89</a> <a href="/show/1990-03-29" onclick="dialShow('1990-03-29');return false">Nassau 3/29/90</a></nav>
+    <nav class="legends"><span class="legends-h">LEGENDARY SHOWS</span> <a href="/show/1969-02-27" onclick="dialShow('1969-02-27');return false">Fillmore West 2/27/69</a> <a href="/show/1970-02-13" onclick="dialShow('1970-02-13');return false">Fillmore East 2/13/70</a> <a href="/show/1970-05-02" onclick="dialShow('1970-05-02');return false">Harpur 5/2/70</a> <a href="/show/1972-08-27" onclick="dialShow('1972-08-27');return false">Veneta 8/27/72</a> <a href="/show/1973-11-11" onclick="dialShow('1973-11-11');return false">Winterland 11/11/73</a> <a href="/show/1973-12-02" onclick="dialShow('1973-12-02');return false">Boston 12/2/73</a> <a href="/show/1977-05-08" onclick="dialShow('1977-05-08');return false">Cornell 5/8/77</a> <a href="/show/1978-01-22" onclick="dialShow('1978-01-22');return false">Eugene 1/22/78</a> <a href="/show/1989-07-07" onclick="dialShow('1989-07-07');return false">JFK 7/7/89</a> <a href="/show/1990-03-29" onclick="dialShow('1990-03-29');return false">Nassau 3/29/90</a></nav>
+    <div class="legends-h arch-h">YEAR</div>
     <div class="year-tabs" id="year-tabs"></div>
     <input class="show-search" id="show-search"
       placeholder="SEARCH SONG, VENUE, CITY, DATE..." oninput="filterShows()">
@@ -1234,7 +1239,7 @@ function renderShows(list,hits){
     const[y,m,d]=s.date.split('-').map(Number);
     const label=`${MONTHS[m-1]} ${String(d).padStart(2,'0')} ${y}`;
     const song=hits&&hits.get(s.date);
-    return `<div class="show-item" onclick="dialShow('${s.date}')">
+    return `<div class="show-item"${song?` data-song="${escHtml(song)}"`:''} onclick="dialShow('${s.date}',this.dataset.song)">
       <div class="show-date">${label}</div>
       <div class="show-venue">${escHtml(s.venue||'—')}</div>
       <div class="show-city">${escHtml(s.city||'')}</div>
@@ -1243,8 +1248,10 @@ function renderShows(list,hits){
   }).join('');
 }
 let dialTimer=null;
-function dialShow(dateStr){
-  if(guardShowChange(()=>dialShow(dateStr))) return;
+// song: set when the card came from a song search, so the show opens on that song
+function dialShow(dateStr,song){
+  if(guardShowChange(()=>dialShow(dateStr,song))) return;
+  pendingSong=song?{date:dateStr,song}:null;
   clearTimeout(nearestTimer);
   const[y,m,d]=dateStr.split('-').map(Number);
   document.getElementById('f-m').value=m;
@@ -1420,6 +1427,15 @@ async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen,skipSources
     // fail, it should just start at the top.
     let start=0;
     if(pendingTrack!=null){start=Math.min(pendingTrack-1,mp3s.length-1);pendingTrack=null;}
+    // Opened from a song search: start on that song. Segues ("Scarlet Begonias >
+    // Fire on the Mountain") match on any part; no match just starts at the top.
+    else if(pendingSong&&pendingSong.date===currentShow.date){
+      const q=pendingSong.song.toLowerCase(),nm=t=>t.name.toLowerCase();
+      let i=tracks.findIndex(t=>nm(t).split(/\s*>\s*/).includes(q));
+      if(i<0) i=tracks.findIndex(t=>nm(t).includes(q));
+      if(i>=0) start=i;
+    }
+    pendingSong=null;
     currentTrack=start;
     buildTracklist();
     document.getElementById('player-panel').classList.add('visible');
@@ -2237,7 +2253,7 @@ function setShowSeo(show,m,d,y,trackCount,isSbd){
   try{history.replaceState(null,'',`?date=${show.date}`);}catch(e){}
 }
 
-let pendingTrack=null, pendingSrc=null;
+let pendingTrack=null, pendingSrc=null, pendingSong=null;
 function checkUrlDate(){
   const params=new URLSearchParams(window.location.search);
   const date=params.get('date');

@@ -1843,7 +1843,11 @@ function playTrack(i,auto){
   // Reassigning src implicitly aborts the previous load. We deliberately do NOT
   // set src='' first — that briefly drops the media session and is the classic
   // cause of playback stalling after a track or two when backgrounded.
-  audio.src=tracks[i].url;
+  // A warmed next track plays straight from the file server, skipping
+  // archive.org's redirect. One use only: replays and retries go back through
+  // archive.org, so a stale server address can't get a track stuck.
+  const t=tracks[i];
+  audio.src=t.fast||t.url; delete t.fast;
   const p=audio.play();
   if(p) p.catch(e=>{if(gen!==playGen||e.name==='AbortError') return;});
   document.getElementById('play-pause-btn').classList.remove('paused');
@@ -1946,6 +1950,21 @@ audio.addEventListener('error',()=>{
   }
 });
 let seeking=false, rafPending=false;
+// Warm up the next track ~30s before this one ends: fetch its first 256KB
+// (~10s of audio). That opens the connection to the file server ahead of time
+// and learns where archive.org redirects the file, so the switch at 'ended'
+// skips both (~1s saved). Next track only, once per track and one small
+// request: preloading more is what gets streams throttled or cut.
+let warmedUrl=null;
+function warmNext(){
+  const t=tracks[currentTrack+1];
+  if(!t||t.url===warmedUrl) return;
+  warmedUrl=t.url;
+  fetch(t.url,{headers:{Range:'bytes=0-262143'}}).then(r=>{
+    if(r.ok&&r.url&&r.url!==t.url&&/^https:\/\/[\w.-]+\.archive\.org\//.test(r.url)) t.fast=r.url;
+    return r.arrayBuffer();
+  }).catch(()=>{});
+}
 audio.addEventListener('timeupdate',()=>{
   if(!audio.duration) return;
   // Bookkeeping runs on every tick. It used to sit inside the
@@ -1958,6 +1977,7 @@ audio.addEventListener('timeupdate',()=>{
   if(deadSkips&&audio.currentTime>playFrom+10) deadSkips=0;
   lastPos=audio.currentTime;   // where to pick up if the stream drops
   updatePositionState();
+  if(audio.duration-audio.currentTime<30) warmNext();
   // Painting waits for a frame, so it's skipped (not queued up) while hidden.
   if(seeking||rafPending) return;
   rafPending=true;

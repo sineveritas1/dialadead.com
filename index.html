@@ -1239,7 +1239,7 @@ function renderShows(list,hits){
     const[y,m,d]=s.date.split('-').map(Number);
     const label=`${MONTHS[m-1]} ${String(d).padStart(2,'0')} ${y}`;
     const song=hits&&hits.get(s.date);
-    return `<div class="show-item" onclick="dialShow('${s.date}')">
+    return `<div class="show-item"${song?` data-song="${escHtml(song)}"`:''} onclick="dialShow('${s.date}',this.dataset.song)">
       <div class="show-date">${label}</div>
       <div class="show-venue">${escHtml(s.venue||'—')}</div>
       <div class="show-city">${escHtml(s.city||'')}</div>
@@ -1248,8 +1248,10 @@ function renderShows(list,hits){
   }).join('');
 }
 let dialTimer=null;
-function dialShow(dateStr){
-  if(guardShowChange(()=>dialShow(dateStr))) return;
+// song: set when the card came from a song search, so the show opens on that song
+function dialShow(dateStr,song){
+  if(guardShowChange(()=>dialShow(dateStr,song))) return;
+  pendingSong=song?{date:dateStr,song}:null;
   clearTimeout(nearestTimer);
   const[y,m,d]=dateStr.split('-').map(Number);
   document.getElementById('f-m').value=m;
@@ -1425,6 +1427,15 @@ async function loadShow(identifier,m,d,y,venue,city,type,gen=loadGen,skipSources
     // fail, it should just start at the top.
     let start=0;
     if(pendingTrack!=null){start=Math.min(pendingTrack-1,mp3s.length-1);pendingTrack=null;}
+    // Opened from a song search: start on that song. Segues ("Scarlet Begonias >
+    // Fire on the Mountain") match on any part; no match just starts at the top.
+    else if(pendingSong&&pendingSong.date===currentShow.date){
+      const q=pendingSong.song.toLowerCase(),nm=t=>t.name.toLowerCase();
+      let i=tracks.findIndex(t=>nm(t).split(/\s*>\s*/).includes(q));
+      if(i<0) i=tracks.findIndex(t=>nm(t).includes(q));
+      if(i>=0) start=i;
+    }
+    pendingSong=null;
     currentTrack=start;
     buildTracklist();
     document.getElementById('player-panel').classList.add('visible');
@@ -2242,7 +2253,7 @@ function setShowSeo(show,m,d,y,trackCount,isSbd){
   try{history.replaceState(null,'',`?date=${show.date}`);}catch(e){}
 }
 
-let pendingTrack=null, pendingSrc=null;
+let pendingTrack=null, pendingSrc=null, pendingSong=null;
 function checkUrlDate(){
   const params=new URLSearchParams(window.location.search);
   const date=params.get('date');

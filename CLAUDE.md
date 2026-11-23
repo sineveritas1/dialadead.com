@@ -100,7 +100,7 @@ show lives at a `?date=` URL nothing links to. Google indexed **zero** pages of
 it. The fix is plain HTML that reads without JS:
 
 - `index.html` has a real `<h1>`, and the top of the collapsed SHOW ARCHIVE
-  panel holds one plain-HTML sentence plus **LEGENDARY NIGHTS** links to
+  panel holds one plain-HTML sentence plus **LEGENDARY SHOWS** links to
   `/show/…` (which `dialShow()` in-app on click). Search engines read
   collapsed content, so this costs no screen height — the homepage must stay a
   single screen. Keep it static, not JS-rendered. Year pages are found via the
